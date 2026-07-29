@@ -16,6 +16,10 @@
   box-sizing: border-box;
 }
 
+html {
+  font-size: 18.5px;
+}
+
 html, body {
   max-width: 100%;
   overflow-x: hidden;
