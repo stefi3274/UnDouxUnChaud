@@ -1,4 +1,6 @@
 import { supabasePublic } from '@/lib/supabase';
+import { getSessionUser } from '@/lib/auth';
+import HeaderNav from '@/app/components/HeaderNav';
 
 const LABELS_CATEGORIE = {
   un_doux: 'Un Doux',
@@ -26,28 +28,11 @@ async function getTextesAcceptes() {
 
 export default async function HomePage() {
   const textes = await getTextesAcceptes();
+  const user = getSessionUser();
 
   return (
     <>
-      <header style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        padding: '20px 6vw', borderBottom: '1px solid #DDD2BC',
-      }}>
-        <div style={{ fontFamily: 'Fraunces, serif', fontSize: '1.3rem', fontWeight: 600 }}>
-          UnDouxUnChaud
-        </div>
-        <nav style={{ display: 'flex', gap: 16 }}>
-          <a href="/inscription" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600 }}>
-            Créer un compte
-          </a>
-          <a href="/connexion" style={{
-            background: '#0E7C81', color: '#fff', padding: '8px 18px',
-            borderRadius: 100, textDecoration: 'none', fontWeight: 600,
-          }}>
-            Se connecter
-          </a>
-        </nav>
-      </header>
+      <HeaderNav user={user} />
 
       <main style={{ maxWidth: 780, margin: '0 auto', padding: '5vw 6vw' }}>
       {textes.length === 0 && (

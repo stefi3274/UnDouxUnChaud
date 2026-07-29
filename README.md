@@ -1,34 +1,48 @@
 # UnDouxUnChaud Magazine — Projet Next.js
 
-⚠️ Ce code n'a pas pu être testé de mon côté (pas d'accès internet
-dans mon environnement pour npm install/build). Structure standard
-Next.js 14, mais teste en local avant de déployer.
+⚠️ Code non testé de mon côté (pas d'accès internet dans mon
+environnement pour npm install/build). Structure standard Next.js 14
+App Router. Teste en local avant de déployer.
 
-## Avant de lancer
+## Pages
 
-1. Exécuter udc-supabase.sql dans Supabase (fourni à part)
-2. `npm install`
-3. Dans `.env.local` : coller ta clé `service_role` (Supabase >
-   Settings > API) et générer un `JWT_SECRET` :
-   ```
-   node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
-   ```
-4. `npm run dev` → http://localhost:3000
+- `/` — accueil, textes acceptés
+- `/inscription`, `/connexion` — comptes (pseudo + mot de passe)
+- `/ecrire` — formulaire complet (catégorie, série/chapitre, image URL,
+  avertissement de contenu, orientation HH/FF, tags, consentement)
+- `/textes/[id]` — lecture, like, commentaires avec réponses et badge Auteur
+- `/profil` — mes textes (statut + raison de refus), mes commentaires
+- `/admin` — file d'attente (accepter/refuser avec raison)
 
-## Fait
+## Rendre un compte admin
 
-- Inscription / connexion / déconnexion (session par cookie signé)
-- Accueil connectée aux vrais textes acceptés (Supabase)
-- API : soumettre un texte, liker, commenter
+Aucune UI pour ça (volontaire). Dans Supabase → Table Editor →
+`udc_users` → trouve ta ligne → change `role` de `lecteur` à `admin`.
+Déconnecte-toi puis reconnecte-toi ensuite (le rôle est écrit dans le
+cookie de session à la connexion, donc il faut une nouvelle connexion
+pour qu'il se mette à jour).
 
-## Reste à faire
+## Pas encore fait
 
-- Relier le formulaire complet (image, tags, série, avertissement)
-- Page de lecture d'un texte (/textes/[id])
-- Espace admin connecté
-- Upload d'image réel (Supabase Storage)
+- Upload d'image réel (le champ attend une URL pour l'instant, pas de
+  Supabase Storage branché)
+- Création de post admin + génération d'image carré/story (existe en
+  maquette HTML, pas encore en vrai code)
 
-## Déploiement Vercel
+## Installation
 
-Ajouter les 4 variables d'environnement dans Project Settings avant
-de déployer, sinon le site plante au démarrage.
+```bash
+npm install
+```
+Puis dans `.env.local` : coller `SUPABASE_SERVICE_ROLE_KEY` et générer
+un `JWT_SECRET` :
+```bash
+node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+```
+```bash
+npm run dev
+```
+
+## Vercel
+
+Mêmes 4 variables d'environnement à ajouter dans Project Settings.
