@@ -10,6 +10,7 @@
   --chaud: #6F8F6B;
   --piment: #CE8B33;
   --piquant: #B23A2E;
+  --poemes: #8A7CA8;
 }
 
 * {
@@ -80,6 +81,7 @@ button {
 .badge.un_chaud { background: var(--chaud); }
 .badge.piment { background: var(--piment); }
 .badge.piquant { background: var(--piquant); }
+.badge.poemes { background: var(--poemes); }
 
 /* Cartes */
 .card {

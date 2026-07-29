@@ -8,6 +8,7 @@ const LABELS_CATEGORIE = {
   un_chaud: 'Un Chaud',
   piment: 'Piment',
   piquant: 'Piquant',
+  poemes: 'Poèmes',
 };
 
 export default function AdminQueue({ textes }) {

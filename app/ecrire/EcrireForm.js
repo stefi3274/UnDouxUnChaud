@@ -8,6 +8,7 @@ const CATEGORIES = [
   { value: 'un_chaud', label: 'Un Chaud', color: '#6F8F6B' },
   { value: 'piment', label: 'Piment', color: '#CE8B33' },
   { value: 'piquant', label: 'Piquant', color: '#B23A2E' },
+  { value: 'poemes', label: 'Poèmes', color: '#8A7CA8' },
 ];
 
 function TagInput({ tags, setTags, placeholder }) {
@@ -64,6 +65,8 @@ export default function EcrireForm() {
   const [chargement, setChargement] = useState(false);
 
   const wordCount = contenu.trim() ? contenu.trim().split(/\s+/).length : 0;
+  const estPoeme = categorie === 'poemes';
+  const sousMinimumPoeme = estPoeme && wordCount < 100;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -71,6 +74,10 @@ export default function EcrireForm() {
 
     if (!consentement) {
       setErreur('La certification de consentement est obligatoire.');
+      return;
+    }
+    if (sousMinimumPoeme) {
+      setErreur('Un poème doit faire au moins 100 mots.');
       return;
     }
 
@@ -178,8 +185,10 @@ export default function EcrireForm() {
             onChange={(e) => setContenu(e.target.value)}
             required
           />
-          <p style={{ fontSize: '0.78rem', color: '#6B6255', marginTop: 6 }}>
-            {wordCount} mot{wordCount > 1 ? 's' : ''} (minimum recommandé : 500)
+          <p style={{ fontSize: '0.78rem', color: sousMinimumPoeme ? '#B23A2E' : '#6B6255', marginTop: 6, fontWeight: sousMinimumPoeme ? 700 : 400 }}>
+            {estPoeme
+              ? `${wordCount} / 100 mots minimum${sousMinimumPoeme ? ' — pas encore atteint' : ''}`
+              : `${wordCount} mot${wordCount > 1 ? 's' : ''} (minimum recommandé : 500)`}
           </p>
         </div>
 
@@ -219,7 +228,7 @@ export default function EcrireForm() {
           </label>
         </div>
 
-        <button type="submit" disabled={chargement} style={{
+        <button type="submit" disabled={chargement || sousMinimumPoeme} style={{
           background: '#2B2620', color: '#EFE7D8', padding: '13px 24px', borderRadius: 100,
           fontWeight: 600, border: 'none', cursor: 'pointer', width: '100%',
         }}>

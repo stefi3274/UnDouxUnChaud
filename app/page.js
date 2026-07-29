@@ -7,6 +7,7 @@ const LABELS_CATEGORIE = {
   un_chaud: 'Un Chaud',
   piment: 'Piment',
   piquant: 'Piquant',
+  poemes: 'Poèmes',
 };
 
 // Server Component : cette fonction tourne côté serveur à chaque

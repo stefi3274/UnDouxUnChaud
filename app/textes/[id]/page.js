@@ -9,6 +9,7 @@ const LABELS_CATEGORIE = {
   un_chaud: 'Un Chaud',
   piment: 'Piment',
   piquant: 'Piquant',
+  poemes: 'Poèmes',
 };
 
 async function getTexte(id) {

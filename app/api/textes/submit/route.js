@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
 
-const CATEGORIES_VALIDES = ['un_doux', 'un_chaud', 'piment', 'piquant'];
+const CATEGORIES_VALIDES = ['un_doux', 'un_chaud', 'piment', 'piquant', 'poemes'];
 
 export async function POST(request) {
   const user = getSessionUser();
@@ -21,6 +21,10 @@ export async function POST(request) {
 
   if (!titre || !contenu || !categorie) {
     return NextResponse.json({ error: 'Titre, texte et catégorie sont requis.' }, { status: 400 });
+  }
+  const wordCount = contenu.trim().split(/\s+/).filter(Boolean).length;
+  if (categorie === 'poemes' && wordCount < 100) {
+    return NextResponse.json({ error: 'Un poème doit faire au moins 100 mots.' }, { status: 400 });
   }
   if (!CATEGORIES_VALIDES.includes(categorie)) {
     return NextResponse.json({ error: 'Catégorie invalide.' }, { status: 400 });
