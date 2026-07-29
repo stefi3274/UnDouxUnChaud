@@ -55,6 +55,9 @@ export default function EcrireForm() {
   const [serieTitre, setSerieTitre] = useState('');
   const [chapitreNum, setChapitreNum] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [imagePreview, setImagePreview] = useState(null);
+  const [imageCredit, setImageCredit] = useState('');
+  const [uploadEnCours, setUploadEnCours] = useState(false);
   const [contenu, setContenu] = useState('');
   const [avertissements, setAvertissements] = useState([]);
   const [orientHH, setOrientHH] = useState(false);
@@ -67,6 +70,33 @@ export default function EcrireForm() {
   const wordCount = contenu.trim() ? contenu.trim().split(/\s+/).length : 0;
   const estPoeme = categorie === 'poemes';
   const sousMinimumPoeme = estPoeme && wordCount < 100;
+
+  async function handleFile(file) {
+    if (!file) return;
+    setImagePreview(URL.createObjectURL(file));
+    setUploadEnCours(true);
+    setErreur('');
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+    const data = await res.json();
+    setUploadEnCours(false);
+
+    if (!res.ok) {
+      setErreur(data.error || "Erreur lors de l'envoi de l'image.");
+      setImagePreview(null);
+      return;
+    }
+    setImageUrl(data.path);
+  }
+
+  function removeImage() {
+    setImageUrl('');
+    setImagePreview(null);
+    setImageCredit('');
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -90,6 +120,7 @@ export default function EcrireForm() {
         orientation_hh: orientHH, orientation_ff: orientFF,
         tags, avertissements,
         image_url: imageUrl || null,
+        image_credit: imageUrl ? (imageCredit || null) : null,
         serie_titre: isSeries ? serieTitre : null,
         chapitre_numero: isSeries && chapitreNum ? parseInt(chapitreNum, 10) : null,
         consentement_certifie: consentement,
@@ -170,11 +201,56 @@ export default function EcrireForm() {
         </div>
 
         <div style={{ marginBottom: 20 }}>
-          <label style={labelStyle}>Image d'illustration (URL, optionnelle)</label>
-          <input style={inputStyle} placeholder="https://..." value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
+          <label style={labelStyle}>Image d'illustration (optionnelle)</label>
+          {imagePreview ? (
+            <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden' }}>
+              <img src={imagePreview} alt="Aperçu" style={{ width: '100%', maxHeight: 260, objectFit: 'cover', display: 'block' }} />
+              {uploadEnCours && (
+                <div style={{
+                  position: 'absolute', inset: 0, background: 'rgba(43,38,32,0.5)', color: '#fff',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600,
+                }}>
+                  Envoi en cours...
+                </div>
+              )}
+              {!uploadEnCours && (
+                <button type="button" onClick={removeImage} style={{
+                  position: 'absolute', top: 10, right: 10, background: 'rgba(43,38,32,0.75)',
+                  color: '#fff', border: 'none', borderRadius: '50%', width: 30, height: 30, cursor: 'pointer',
+                }}>✕</button>
+              )}
+            </div>
+          ) : (
+            <label style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              gap: 8, padding: '32px 16px', border: '1.5px dashed #DDD2BC', borderRadius: 14,
+              background: '#fff', cursor: 'pointer', color: '#6B6255', fontSize: '0.85rem',
+            }}>
+              <span style={{ fontSize: '1.6rem', color: '#0E7C81' }}>＋</span>
+              Clique ou dépose une image depuis ton appareil
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(e) => handleFile(e.target.files[0])}
+                hidden
+              />
+            </label>
+          )}
           <p style={{ fontSize: '0.78rem', color: '#6B6255', marginTop: 6 }}>
-            Upload direct pas encore branché (Supabase Storage à venir) — colle une URL d'image hébergée pour l'instant.
+            JPG, PNG ou WEBP, 5 Mo maximum. Reste suggestive plutôt qu'explicite, vérifiée avant acceptation.
           </p>
+
+          {imagePreview && (
+            <div style={{ marginTop: 12 }}>
+              <label style={labelStyle}>Crédit de l'image <span style={{ textTransform: 'none', fontWeight: 400 }}>(optionnel)</span></label>
+              <input
+                style={inputStyle}
+                placeholder="Ex : Photo de toi-même, ou @pseudo / nom du site source"
+                value={imageCredit}
+                onChange={(e) => setImageCredit(e.target.value)}
+              />
+            </div>
+          )}
         </div>
 
         <div style={{ marginBottom: 20 }}>
@@ -228,7 +304,7 @@ export default function EcrireForm() {
           </label>
         </div>
 
-        <button type="submit" disabled={chargement || sousMinimumPoeme} style={{
+        <button type="submit" disabled={chargement || sousMinimumPoeme || uploadEnCours} style={{
           background: '#2B2620', color: '#EFE7D8', padding: '13px 24px', borderRadius: 100,
           fontWeight: 600, border: 'none', cursor: 'pointer', width: '100%',
         }}>

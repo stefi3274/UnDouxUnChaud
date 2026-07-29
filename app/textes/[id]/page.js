@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { supabasePublic } from '@/lib/supabase';
+import { supabasePublic, supabaseAdmin } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
 import HeaderNav from '@/app/components/HeaderNav';
 import TexteInteractions from './TexteInteractions';
@@ -49,6 +49,14 @@ export default async function TextePage({ params }) {
   ]);
   const user = getSessionUser();
 
+  let imageSignedUrl = null;
+  if (texte.image_url) {
+    const { data } = await supabaseAdmin.storage
+      .from('textes-images')
+      .createSignedUrl(texte.image_url, 3600); // valide 1h
+    imageSignedUrl = data?.signedUrl || null;
+  }
+
   return (
     <>
       <HeaderNav user={user} />
@@ -73,8 +81,15 @@ export default async function TextePage({ params }) {
           </div>
         )}
 
-        {texte.image_url && (
-          <img src={texte.image_url} alt="" style={{ width: '100%', borderRadius: 14, marginTop: 20 }} />
+        {imageSignedUrl && (
+          <>
+            <img src={imageSignedUrl} alt="" style={{ width: '100%', borderRadius: 14, marginTop: 20 }} />
+            {texte.image_credit && (
+              <p style={{ fontSize: '0.78rem', color: '#6B6255', marginTop: 8, textAlign: 'right' }}>
+                {texte.image_credit}
+              </p>
+            )}
+          </>
         )}
 
         <div style={{ fontFamily: 'Fraunces, serif', fontSize: '1.1rem', lineHeight: 1.85, marginTop: 28, whiteSpace: 'pre-wrap' }}>

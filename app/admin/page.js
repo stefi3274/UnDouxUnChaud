@@ -9,11 +9,21 @@ export default async function AdminPage() {
   if (!user) redirect('/connexion');
   if (user.role !== 'admin') redirect('/');
 
-  const { data: textes } = await supabaseAdmin
+  const { data: textesRaw } = await supabaseAdmin
     .from('udc_textes')
     .select('*, udc_users(pseudo)')
     .eq('statut', 'en_attente')
     .order('date_soumission', { ascending: true });
+
+  const textes = await Promise.all(
+    (textesRaw || []).map(async (t) => {
+      if (!t.image_url) return { ...t, image_signed_url: null };
+      const { data } = await supabaseAdmin.storage
+        .from('textes-images')
+        .createSignedUrl(t.image_url, 3600);
+      return { ...t, image_signed_url: data?.signedUrl || null };
+    })
+  );
 
   return (
     <>

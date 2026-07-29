@@ -15,7 +15,7 @@ export async function POST(request) {
     titre, contenu, categorie,
     orientation_hh, orientation_ff,
     tags, avertissements,
-    image_url, serie_titre, chapitre_numero,
+    image_url, image_credit, serie_titre, chapitre_numero,
     consentement_certifie,
   } = body;
 
@@ -45,6 +45,7 @@ export async function POST(request) {
       tags: tags || [],
       avertissements: avertissements || [],
       image_url: image_url || null,
+      image_credit: image_credit || null,
       serie_titre: serie_titre || null,
       chapitre_numero: chapitre_numero || null,
       consentement_certifie: true,

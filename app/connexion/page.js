@@ -34,7 +34,16 @@ export default function ConnexionPage() {
   }
 
   return (
-    <main style={{ maxWidth: 420, margin: '10vh auto', padding: '0 6vw' }}>
+    <>
+    <header style={{ padding: '20px 6vw', display: 'flex', alignItems: 'center', gap: 14 }}>
+        <a href="/" aria-label="Retour à l'accueil" style={{
+          fontSize: '1.2rem', textDecoration: 'none', color: '#2B2620',
+          border: '1px solid #DDD2BC', borderRadius: '50%', width: 40, height: 40,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        }}>⬅️</a>
+      </header>
+
+      <main style={{ maxWidth: 420, margin: '5vh auto 0', padding: '0 6vw' }}>
       <h1 style={{ fontFamily: 'Fraunces, serif' }}>Connexion</h1>
 
       {erreur && (
@@ -69,5 +78,6 @@ export default function ConnexionPage() {
         </button>
       </form>
     </main>
+    </>
   );
 }

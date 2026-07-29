@@ -16,9 +16,16 @@ export default function HeaderNav({ user }) {
       display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
       gap: 16, flexWrap: 'wrap', padding: '20px 6vw', borderBottom: '1px solid #DDD2BC',
     }}>
-      <div>
-        <div className="site-logo">Un<span>Doux</span>UnChaud</div>
-        <div className="site-sub">Magazine littéraire</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <a href="/" aria-label="Retour à l'accueil" style={{
+          fontSize: '1.2rem', textDecoration: 'none', color: '#2B2620',
+          border: '1px solid #DDD2BC', borderRadius: '50%', width: 40, height: 40,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        }}>⬅️</a>
+        <div>
+          <div className="site-logo">Un<span>Doux</span>UnChaud</div>
+          <div className="site-sub">Magazine littéraire</div>
+        </div>
       </div>
 
       {user ? (

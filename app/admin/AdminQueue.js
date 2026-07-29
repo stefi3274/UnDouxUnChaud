@@ -54,7 +54,12 @@ export default function AdminQueue({ textes }) {
           padding: 22, marginBottom: 16,
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-            <div>
+            {t.image_signed_url && (
+              <img src={t.image_signed_url} alt="" style={{
+                width: 84, height: 84, objectFit: 'cover', borderRadius: 12, flexShrink: 0,
+              }} />
+            )}
+            <div style={{ flex: 1, minWidth: 200 }}>
               <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase' }}>
                 {LABELS_CATEGORIE[t.categorie]}
               </span>
