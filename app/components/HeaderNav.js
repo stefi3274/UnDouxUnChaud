@@ -34,9 +34,13 @@ export default function HeaderNav({ user }) {
 
       {user ? (
         <nav style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
-          <a href="/ecrire" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600 }}>Écrire</a>
-          <a href="/profil" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600 }}>Mon profil</a>
-          {user.role === 'admin' && (
+          {pathname !== '/ecrire' && (
+            <a href="/ecrire" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600 }}>Écrire</a>
+          )}
+          {pathname !== '/profil' && (
+            <a href="/profil" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600 }}>Mon profil</a>
+          )}
+          {user.role === 'admin' && pathname !== '/admin' && (
             <a href="/admin" style={{ color: '#0A5F63', textDecoration: 'none', fontWeight: 700 }}>Admin</a>
           )}
           <span style={{ color: '#6B6255', fontSize: '0.85rem' }}>@{user.pseudo}</span>
@@ -46,12 +50,16 @@ export default function HeaderNav({ user }) {
         </nav>
       ) : (
         <nav style={{ display: 'flex', gap: 16 }}>
-          <a href="/inscription" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600 }}>
-            Créer un compte
-          </a>
-          <a href="/connexion" className="btn-turquoise">
-            Se connecter
-          </a>
+          {pathname !== '/inscription' && (
+            <a href="/inscription" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600 }}>
+              Créer un compte
+            </a>
+          )}
+          {pathname !== '/connexion' && (
+            <a href="/connexion" className="btn-turquoise">
+              Se connecter
+            </a>
+          )}
         </nav>
       )}
     </header>

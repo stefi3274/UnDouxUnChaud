@@ -33,14 +33,27 @@ export default function ConnexionPage() {
     router.refresh();
   }
 
+  const inputStyle = {
+    width: '100%', padding: '10px 12px', border: '1px solid #DDD2BC',
+    borderRadius: 10, fontSize: '0.9rem', background: '#fff', marginTop: 6,
+  };
+  const labelStyle = {
+    display: 'block', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase',
+    letterSpacing: '0.04em', color: '#6B6255',
+  };
+
   return (
     <>
-    <header style={{ padding: '20px 6vw', display: 'flex', alignItems: 'center', gap: 14 }}>
+    <header style={{ padding: '20px 6vw', display: 'flex', alignItems: 'center', gap: 14, borderBottom: '1px solid #DDD2BC' }}>
         <a href="/" aria-label="Retour à l'accueil" style={{
           fontSize: '1.2rem', textDecoration: 'none', color: '#2B2620',
           border: '1px solid #DDD2BC', borderRadius: '50%', width: 40, height: 40,
           display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
         }}>⬅️</a>
+        <div>
+          <div className="site-logo">Un<span>Doux</span>UnChaud</div>
+          <div className="site-sub">Magazine littéraire</div>
+        </div>
       </header>
 
       <main style={{ maxWidth: 420, margin: '5vh auto 0', padding: '0 6vw' }}>
@@ -54,26 +67,26 @@ export default function ConnexionPage() {
 
       <form onSubmit={handleSubmit} style={{ marginTop: 20 }}>
         <div style={{ marginBottom: 16 }}>
-          <label>Pseudo</label>
+          <label style={labelStyle}>Pseudo</label>
           <input
             type="text"
             value={pseudo}
             onChange={(e) => setPseudo(e.target.value)}
             required
-            style={{ width: '100%', padding: 10, marginTop: 6 }}
+            style={inputStyle}
           />
         </div>
-        <div style={{ marginBottom: 16 }}>
-          <label>Mot de passe</label>
+        <div style={{ marginBottom: 20 }}>
+          <label style={labelStyle}>Mot de passe</label>
           <input
             type="password"
             value={motdepasse}
             onChange={(e) => setMotdepasse(e.target.value)}
             required
-            style={{ width: '100%', padding: 10, marginTop: 6 }}
+            style={inputStyle}
           />
         </div>
-        <button type="submit" disabled={chargement} style={{ padding: '12px 24px' }}>
+        <button type="submit" disabled={chargement} className="btn-primary" style={{ width: '100%' }}>
           {chargement ? 'Connexion...' : 'Se connecter'}
         </button>
       </form>

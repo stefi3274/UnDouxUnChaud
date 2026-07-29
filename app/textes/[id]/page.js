@@ -49,6 +49,17 @@ export default async function TextePage({ params }) {
   ]);
   const user = getSessionUser();
 
+  let dejaLike = false;
+  if (user) {
+    const { data: likeExistant } = await supabasePublic
+      .from('udc_likes')
+      .select('id')
+      .eq('texte_id', texte.id)
+      .eq('user_id', user.id)
+      .maybeSingle();
+    dejaLike = !!likeExistant;
+  }
+
   let imageSignedUrl = null;
   if (texte.image_url) {
     const { data } = await supabaseAdmin.storage
@@ -61,7 +72,7 @@ export default async function TextePage({ params }) {
     <>
       <HeaderNav user={user} />
       <main style={{ maxWidth: 680, margin: '0 auto', padding: '5vw 6vw 8vw' }}>
-        <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase' }}>
+        <span className={`badge ${texte.categorie}`}>
           {LABELS_CATEGORIE[texte.categorie]}
         </span>
         <h1 style={{ fontFamily: 'Fraunces, serif', marginTop: 10 }}>{texte.titre}</h1>
@@ -100,6 +111,7 @@ export default async function TextePage({ params }) {
           texteId={texte.id}
           auteurId={texte.user_id}
           initialLikes={likeCount}
+          initiallyLiked={dejaLike}
           comments={comments}
           user={user}
         />

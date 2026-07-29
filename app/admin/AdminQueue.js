@@ -60,7 +60,7 @@ export default function AdminQueue({ textes }) {
               }} />
             )}
             <div style={{ flex: 1, minWidth: 200 }}>
-              <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase' }}>
+              <span className={`badge ${t.categorie}`}>
                 {LABELS_CATEGORIE[t.categorie]}
               </span>
               <h3 style={{ fontFamily: 'Fraunces, serif', marginTop: 6 }}>{t.titre}</h3>
@@ -84,7 +84,11 @@ export default function AdminQueue({ textes }) {
                 Accepter
               </button>
               <button
-                onClick={() => setRefuseOpenId(refuseOpenId === t.id ? null : t.id)}
+                onClick={() => {
+                  const nouveau = refuseOpenId === t.id ? null : t.id;
+                  setRefuseOpenId(nouveau);
+                  setRaison('');
+                }}
                 style={{ background: 'none', border: '1px solid #B23A2E', color: '#B23A2E', borderRadius: 100, padding: '9px 18px', fontWeight: 600, cursor: 'pointer' }}
               >
                 Refuser

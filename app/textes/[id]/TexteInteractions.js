@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function TexteInteractions({ texteId, auteurId, initialLikes, comments, user }) {
+export default function TexteInteractions({ texteId, auteurId, initialLikes, initiallyLiked, comments, user }) {
   const router = useRouter();
   const [likes, setLikes] = useState(initialLikes);
-  const [liked, setLiked] = useState(false);
+  const [liked, setLiked] = useState(!!initiallyLiked);
   const [commentaire, setCommentaire] = useState('');
   const [replyTo, setReplyTo] = useState(null);
   const [envoi, setEnvoi] = useState(false);

@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getSessionUser } from '@/lib/auth';
+import HeaderNav from '@/app/components/HeaderNav';
 import EcrireForm from './EcrireForm';
 
 export default function EcrirePage() {
@@ -8,5 +9,10 @@ export default function EcrirePage() {
     redirect('/connexion');
   }
 
-  return <EcrireForm />;
+  return (
+    <>
+      <HeaderNav user={user} />
+      <EcrireForm />
+    </>
+  );
 }
