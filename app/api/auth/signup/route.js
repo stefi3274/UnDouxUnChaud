@@ -1,0 +1,42 @@
+import { NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
+import { supabaseAdmin } from '@/lib/supabase';
+import { createSession } from '@/lib/auth';
+
+export async function POST(request) {
+  const { pseudo, motdepasse, email } = await request.json();
+
+  if (!pseudo || !motdepasse) {
+    return NextResponse.json({ error: 'Pseudo et mot de passe requis.' }, { status: 400 });
+  }
+  if (motdepasse.length < 8) {
+    return NextResponse.json({ error: 'Le mot de passe doit faire au moins 8 caractères.' }, { status: 400 });
+  }
+
+  // Vérifie que le pseudo n'existe pas déjà
+  const { data: existant } = await supabaseAdmin
+    .from('udc_users')
+    .select('id')
+    .eq('pseudo', pseudo)
+    .maybeSingle();
+
+  if (existant) {
+    return NextResponse.json({ error: 'Ce pseudo est déjà pris.' }, { status: 409 });
+  }
+
+  const password_hash = await bcrypt.hash(motdepasse, 10);
+
+  const { data: nouvelUtilisateur, error } = await supabaseAdmin
+    .from('udc_users')
+    .insert({ pseudo, password_hash, email: email || null })
+    .select('id, pseudo, role')
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: 'Erreur lors de la création du compte.' }, { status: 500 });
+  }
+
+  createSession(nouvelUtilisateur);
+
+  return NextResponse.json({ user: nouvelUtilisateur });
+}
