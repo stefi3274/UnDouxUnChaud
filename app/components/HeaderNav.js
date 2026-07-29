@@ -1,9 +1,11 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 export default function HeaderNav({ user }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const estAccueil = pathname === '/';
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -17,11 +19,13 @@ export default function HeaderNav({ user }) {
       gap: 16, flexWrap: 'wrap', padding: '20px 6vw', borderBottom: '1px solid #DDD2BC',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-        <a href="/" aria-label="Retour à l'accueil" style={{
-          fontSize: '1.2rem', textDecoration: 'none', color: '#2B2620',
-          border: '1px solid #DDD2BC', borderRadius: '50%', width: 40, height: 40,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-        }}>⬅️</a>
+        {!estAccueil && (
+          <a href="/" aria-label="Retour à l'accueil" style={{
+            fontSize: '1.2rem', textDecoration: 'none', color: '#2B2620',
+            border: '1px solid #DDD2BC', borderRadius: '50%', width: 40, height: 40,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          }}>⬅️</a>
+        )}
         <div>
           <div className="site-logo">Un<span>Doux</span>UnChaud</div>
           <div className="site-sub">Magazine littéraire</div>
