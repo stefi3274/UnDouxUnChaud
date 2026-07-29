@@ -1,14 +1,7 @@
 import { supabasePublic } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
 import HeaderNav from '@/app/components/HeaderNav';
-
-const LABELS_CATEGORIE = {
-  un_doux: 'Un Doux',
-  un_chaud: 'Un Chaud',
-  piment: 'Piment',
-  piquant: 'Piquant',
-  poemes: 'Poèmes',
-};
+import TextesFeed from '@/app/components/TextesFeed';
 
 // Server Component : cette fonction tourne côté serveur à chaque
 // chargement de page, avant l'envoi du HTML au navigateur.
@@ -18,7 +11,7 @@ async function getTextesAcceptes() {
     .select('id, titre, contenu, categorie, date_publication, user_id, udc_users(pseudo)')
     .eq('statut', 'accepte')
     .order('date_publication', { ascending: false })
-    .limit(20);
+    .limit(30);
 
   if (error) {
     console.error('Erreur chargement textes:', error.message);
@@ -35,27 +28,49 @@ export default async function HomePage() {
     <>
       <HeaderNav user={user} />
 
-      <main style={{ maxWidth: 780, margin: '0 auto', padding: '5vw 6vw' }}>
-      {textes.length === 0 && (
-        <p style={{ color: '#6B6255', marginTop: 20 }}>
-          Aucun texte publié pour le moment.
+      <section className="hero">
+        <h1>Du tendre <em>au brûlant,</em><br />un texte à la fois.</h1>
+        <p>
+          Des récits écrits par sa communauté, classés du plus doux au plus
+          piquant. Lecture libre pour tous, un compte pour écrire, aimer et
+          commenter.
         </p>
-      )}
+        <div className="hero-ctas">
+          {user ? (
+            <a href="/ecrire" className="btn-primary">✍️ Écrire mon texte</a>
+          ) : (
+            <a href="/inscription" className="btn-primary">Créer un compte pour écrire</a>
+          )}
+          <a href="#fil" className="btn-outline">Découvrir les textes</a>
+        </div>
+      </section>
 
-      <div style={{ display: 'grid', gap: 16, marginTop: 24 }}>
-        {textes.map((texte) => (
-          <a key={texte.id} href={`/textes/${texte.id}`} className="card">
-            <span className={`badge ${texte.categorie}`}>
-              {LABELS_CATEGORIE[texte.categorie]}
-            </span>
-            <h3 style={{ marginTop: 10 }}>{texte.titre}</h3>
-            <p style={{ fontSize: '0.85rem', color: '#6B6255', marginTop: 6 }}>
-              {texte.udc_users?.pseudo}
-            </p>
-          </a>
-        ))}
+      <div className="scale-strip">
+        <div className="scale-title">L'échelle des saveurs</div>
+        <div className="scale-item">
+          <span className="scale-dot" style={{ background: '#D98CA0' }} />
+          Un Doux
+        </div>
+        <div className="scale-item">
+          <span className="scale-dot" style={{ background: '#6F8F6B' }} />
+          Un Chaud
+        </div>
+        <div className="scale-item">
+          <span className="scale-dot" style={{ background: '#CE8B33' }} />
+          Piment
+        </div>
+        <div className="scale-item">
+          <span className="scale-dot" style={{ background: '#B23A2E' }} />
+          Piquant
+        </div>
+        <div className="scale-item">
+          <span className="scale-dot" style={{ background: '#8A7CA8' }} />
+          Poèmes
+        </div>
       </div>
-      </main>
+
+      <div id="fil" />
+      <TextesFeed textes={textes} hasAccount={!!user} />
     </>
   );
 }

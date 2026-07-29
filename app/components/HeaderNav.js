@@ -35,10 +35,14 @@ export default function HeaderNav({ user }) {
       {user ? (
         <nav style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
           {pathname !== '/ecrire' && (
-            <a href="/ecrire" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600 }}>Écrire</a>
+            <a href="/ecrire" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span aria-hidden="true">✍️</span> Écrire
+            </a>
           )}
           {pathname !== '/profil' && (
-            <a href="/profil" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600 }}>Mon profil</a>
+            <a href="/profil" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span aria-hidden="true">👤</span> Mon profil
+            </a>
           )}
           {user.role === 'admin' && pathname !== '/admin' && (
             <a href="/admin" style={{ color: '#0A5F63', textDecoration: 'none', fontWeight: 700 }}>Admin</a>
