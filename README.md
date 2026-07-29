@@ -1,48 +1,59 @@
 # UnDouxUnChaud Magazine — Projet Next.js
 
-⚠️ Code non testé de mon côté (pas d'accès internet dans mon
-environnement pour npm install/build). Structure standard Next.js 14
-App Router. Teste en local avant de déployer.
+⚠️ IMPORTANT : ce code a été écrit sans pouvoir être testé (mon
+environnement de travail n'a pas accès à internet pour faire un
+`npm install` ni un `npm run build`). La structure suit les
+conventions standards de Next.js 14 (App Router), mais teste-le en
+local avant de déployer, il peut y avoir une coquille à corriger.
 
-## Pages
+## Ce qui est fait
 
-- `/` — accueil, textes acceptés
-- `/inscription`, `/connexion` — comptes (pseudo + mot de passe)
-- `/ecrire` — formulaire complet (catégorie, série/chapitre, image URL,
-  avertissement de contenu, orientation HH/FF, tags, consentement)
-- `/textes/[id]` — lecture, like, commentaires avec réponses et badge Auteur
-- `/profil` — mes textes (statut + raison de refus), mes commentaires
-- `/admin` — file d'attente (accepter/refuser avec raison)
+- Inscription (pseudo + mot de passe, email optionnel)
+- Connexion / déconnexion (session par cookie signé, sans Supabase Auth)
+- Page d'accueil qui affiche les vrais textes acceptés depuis Supabase
+- Soumission d'un texte (API, à relier au formulaire complet du mockup HTML)
+- Like (toggle) et commentaires (API)
 
-## Rendre un compte admin
+## Ce qui reste à faire
 
-Aucune UI pour ça (volontaire). Dans Supabase → Table Editor →
-`udc_users` → trouve ta ligne → change `role` de `lecteur` à `admin`.
-Déconnecte-toi puis reconnecte-toi ensuite (le rôle est écrit dans le
-cookie de session à la connexion, donc il faut une nouvelle connexion
-pour qu'il se mette à jour).
-
-## Pas encore fait
-
-- Upload d'image réel (le champ attend une URL pour l'instant, pas de
-  Supabase Storage branché)
-- Création de post admin + génération d'image carré/story (existe en
-  maquette HTML, pas encore en vrai code)
+- Relier le vrai formulaire de soumission (celui du mockup
+  `udc-accueil.html`, avec image/tags/série/avertissement) à la route
+  `/api/textes/submit`
+- Page de lecture d'un texte (`/textes/[id]`) avec les vrais
+  commentaires et le bouton like connecté
+- Espace admin connecté (accepter/refuser, créer un post)
+- Upload d'image réel (actuellement le champ `image_url` attend une
+  URL déjà hébergée ; il faudra utiliser Supabase Storage pour
+  l'upload direct depuis le formulaire)
 
 ## Installation
 
 ```bash
 npm install
 ```
-Puis dans `.env.local` : coller `SUPABASE_SERVICE_ROLE_KEY` et générer
-un `JWT_SECRET` :
-```bash
-node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
-```
+
+## Configuration
+
+1. Renomme `.env.local` s'il a perdu son nom en le téléchargeant
+2. Va chercher ta clé `service_role` dans Supabase > Settings > API,
+   colle-la dans `.env.local` à la place de `colle_ta_cle_service_role_ici`
+3. Génère un `JWT_SECRET` avec :
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+   ```
+   et colle le résultat dans `.env.local`
+
+## Lancer en local
+
 ```bash
 npm run dev
 ```
 
-## Vercel
+Puis ouvre http://localhost:3000
 
-Mêmes 4 variables d'environnement à ajouter dans Project Settings.
+## Déploiement sur Vercel
+
+Ajoute les 4 variables d'environnement (`NEXT_PUBLIC_SUPABASE_URL`,
+`NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`,
+`JWT_SECRET`) dans Project Settings > Environment Variables sur
+Vercel avant de déployer, sinon le site plantera au démarrage.

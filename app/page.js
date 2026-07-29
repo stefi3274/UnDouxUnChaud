@@ -43,23 +43,11 @@ export default async function HomePage() {
 
       <div style={{ display: 'grid', gap: 16, marginTop: 24 }}>
         {textes.map((texte) => (
-          <a
-            key={texte.id}
-            href={`/textes/${texte.id}`}
-            style={{
-              display: 'block',
-              padding: 20,
-              borderRadius: 14,
-              border: '1px solid #DDD2BC',
-              background: '#F8F3E8',
-              textDecoration: 'none',
-              color: '#2B2620',
-            }}
-          >
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase' }}>
+          <a key={texte.id} href={`/textes/${texte.id}`} className="card">
+            <span className={`badge ${texte.categorie}`}>
               {LABELS_CATEGORIE[texte.categorie]}
             </span>
-            <h3 style={{ fontFamily: 'Fraunces, serif', marginTop: 6 }}>{texte.titre}</h3>
+            <h3 style={{ marginTop: 10 }}>{texte.titre}</h3>
             <p style={{ fontSize: '0.85rem', color: '#6B6255', marginTop: 6 }}>
               {texte.udc_users?.pseudo}
             </p>
