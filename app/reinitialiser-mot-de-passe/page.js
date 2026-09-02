@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import PasswordInput from '@/app/components/PasswordInput';
 
 function FormulaireReinitialisation() {
   const router = useRouter();
@@ -75,8 +76,7 @@ function FormulaireReinitialisation() {
       <form onSubmit={handleSubmit} style={{ marginTop: 20 }}>
         <div style={{ marginBottom: 16 }}>
           <label style={labelStyle}>Nouveau mot de passe (8 caractères minimum)</label>
-          <input
-            type="password"
+          <PasswordInput
             value={motdepasse}
             onChange={(e) => setMotdepasse(e.target.value)}
             required
@@ -86,8 +86,7 @@ function FormulaireReinitialisation() {
         </div>
         <div style={{ marginBottom: 20 }}>
           <label style={labelStyle}>Confirme le mot de passe</label>
-          <input
-            type="password"
+          <PasswordInput
             value={confirmation}
             onChange={(e) => setConfirmation(e.target.value)}
             required

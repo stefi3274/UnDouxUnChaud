@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import PasswordInput from '@/app/components/PasswordInput';
 
 export default function InscriptionPage() {
   const router = useRouter();
@@ -97,8 +98,7 @@ export default function InscriptionPage() {
         </div>
         <div style={{ marginBottom: 20 }}>
           <label style={labelStyle}>Mot de passe (8 caractères minimum)</label>
-          <input
-            type="password"
+          <PasswordInput
             value={motdepasse}
             onChange={(e) => setMotdepasse(e.target.value)}
             required
