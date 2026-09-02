@@ -90,6 +90,9 @@ export default function ConnexionPage() {
           {chargement ? 'Connexion...' : 'Se connecter'}
         </button>
       </form>
+      <a href="/mot-de-passe-oublie" style={{ display: 'block', textAlign: 'center', marginTop: 16, fontSize: '0.85rem', color: '#0A5F63' }}>
+        Mot de passe oublié ?
+      </a>
     </main>
     </>
   );
