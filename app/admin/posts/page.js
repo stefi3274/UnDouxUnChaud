@@ -11,7 +11,7 @@ export default async function AdminPostsPage() {
 
   const { data: textes } = await supabaseAdmin
     .from('udc_textes')
-    .select('id, titre, contenu, categorie, image_url, udc_users(pseudo)')
+    .select('id, titre, contenu, categorie, image_url, orientation_hh, orientation_ff, udc_users(pseudo)')
     .eq('statut', 'accepte')
     .order('date_publication', { ascending: false })
     .limit(200);

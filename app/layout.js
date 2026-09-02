@@ -1,6 +1,7 @@
 import './globals.css';
 
 export const metadata = {
+  metadataBase: new URL('https://un-doux-un-chaud.vercel.app'),
   title: 'UnDouxUnChaud Magazine',
   description: "Du tendre au brûlant, un texte à la fois.",
   icons: {

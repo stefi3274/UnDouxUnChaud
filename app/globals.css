@@ -6,11 +6,11 @@
   --turquoise-deep: #0A5F63;
   --ink: #2B2620;
   --ink-soft: #6B6255;
-  --doux: #D98CA0;
-  --chaud: #6F8F6B;
-  --piment: #CE8B33;
-  --piquant: #B23A2E;
-  --poemes: #8A7CA8;
+  --doux: #E85D8A;
+  --chaud: #3F8F5C;
+  --piment: #E08A1D;
+  --piquant: #D4321F;
+  --poemes: #9B5FC0;
 }
 
 * {
@@ -88,6 +88,7 @@ button {
   display: block;
   background: var(--beige-card);
   border: 1px solid var(--beige-line);
+  border-left: 4px solid var(--beige-line);
   border-radius: 16px;
   padding: 20px;
   text-decoration: none;
@@ -98,6 +99,11 @@ button {
   transform: translateY(-2px);
   box-shadow: 0 10px 24px rgba(43,38,32,0.08);
 }
+.card-un_doux { border-left-color: var(--doux); }
+.card-un_chaud { border-left-color: var(--chaud); }
+.card-piment { border-left-color: var(--piment); }
+.card-piquant { border-left-color: var(--piquant); }
+.card-poemes { border-left-color: var(--poemes); }
 
 /* Boutons */
 .btn-primary {
@@ -141,8 +147,27 @@ button {
 
 /* Hero accueil */
 .hero {
+  position: relative;
   padding: 6vw 6vw 4vw;
   max-width: 780px;
+  overflow: visible;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -18vw;
+  left: -10vw;
+  width: 68vw;
+  height: 46vw;
+  min-width: 520px;
+  min-height: 360px;
+  background: linear-gradient(100deg,
+    var(--doux) 0%, var(--chaud) 26%, var(--piment) 52%, var(--piquant) 76%, var(--poemes) 100%);
+  opacity: 0.20;
+  filter: blur(70px);
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
 }
 .hero h1 {
   font-size: clamp(2rem, 5.5vw, 3.6rem);
@@ -193,8 +218,8 @@ button {
 .scale-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 14px 8px 10px;
+  gap: 9px;
+  padding: 8px 14px 8px 12px;
   border-radius: 100px;
   background: #fff;
   border: 1px solid var(--beige-line);
@@ -205,7 +230,8 @@ button {
   color: var(--ink);
 }
 .scale-dot {
-  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.6);
 }
 
 /* Filtres */

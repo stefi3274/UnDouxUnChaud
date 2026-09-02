@@ -2,6 +2,7 @@ import { supabasePublic } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
 import HeaderNav from '@/app/components/HeaderNav';
 import TextesFeed from '@/app/components/TextesFeed';
+import AdBanner from '@/app/components/AdBanner';
 
 // Server Component : cette fonction tourne côté serveur à chaque
 // chargement de page, avant l'envoi du HTML au navigateur.
@@ -20,8 +21,22 @@ async function getTextesAcceptes() {
   return data;
 }
 
+async function getPubsActives() {
+  const { data, error } = await supabasePublic
+    .from('udc_ads')
+    .select('*')
+    .eq('actif', true)
+    .order('ordre', { ascending: true });
+
+  if (error) return { fil: [], banniere: [] };
+  return {
+    fil: data.filter((a) => a.emplacement === 'fil'),
+    banniere: data.filter((a) => a.emplacement === 'banniere'),
+  };
+}
+
 export default async function HomePage() {
-  const textes = await getTextesAcceptes();
+  const [textes, pubs] = await Promise.all([getTextesAcceptes(), getPubsActives()]);
   const user = getSessionUser();
 
   return (
@@ -48,29 +63,30 @@ export default async function HomePage() {
       <div className="scale-strip">
         <div className="scale-title">L'échelle des saveurs</div>
         <div className="scale-item">
-          <span className="scale-dot" style={{ background: '#D98CA0' }} />
+          <span className="scale-dot" style={{ background: '#E85D8A' }} />
           Un Doux
         </div>
         <div className="scale-item">
-          <span className="scale-dot" style={{ background: '#6F8F6B' }} />
+          <span className="scale-dot" style={{ background: '#3F8F5C' }} />
           Un Chaud
         </div>
         <div className="scale-item">
-          <span className="scale-dot" style={{ background: '#CE8B33' }} />
+          <span className="scale-dot" style={{ background: '#E08A1D' }} />
           Piment
         </div>
         <div className="scale-item">
-          <span className="scale-dot" style={{ background: '#B23A2E' }} />
+          <span className="scale-dot" style={{ background: '#D4321F' }} />
           Piquant
         </div>
         <div className="scale-item">
-          <span className="scale-dot" style={{ background: '#8A7CA8' }} />
+          <span className="scale-dot" style={{ background: '#9B5FC0' }} />
           Poèmes
         </div>
       </div>
 
       <div id="fil" />
-      <TextesFeed textes={textes} hasAccount={!!user} />
+      <AdBanner ads={pubs.banniere} />
+      <TextesFeed textes={textes} hasAccount={!!user} ads={pubs.fil} />
     </>
   );
 }

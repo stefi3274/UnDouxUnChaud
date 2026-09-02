@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import AdCard from './AdCard';
 
 const CATEGORIES = [
   { value: 'tout', label: 'Tout' },
@@ -19,12 +20,14 @@ const LABELS_CATEGORIE = {
   poemes: 'Poèmes',
 };
 
+const INTERVALLE_PUB = 6;
+
 function extrait(contenu) {
   const clean = contenu.trim().replace(/\s+/g, ' ');
   return clean.length > 160 ? clean.slice(0, 160) + '…' : clean;
 }
 
-export default function TextesFeed({ textes, hasAccount }) {
+export default function TextesFeed({ textes, hasAccount, ads = [] }) {
   const [filtre, setFiltre] = useState('tout');
 
   const visibles = filtre === 'tout' ? textes : textes.filter((t) => t.categorie === filtre);
@@ -59,17 +62,22 @@ export default function TextesFeed({ textes, hasAccount }) {
       )}
 
       <div className="feed">
-        {visibles.map((texte) => (
-          <a key={texte.id} href={`/textes/${texte.id}`} className="card">
-            <span className={`badge ${texte.categorie}`}>
-              {LABELS_CATEGORIE[texte.categorie]}
-            </span>
-            <h3 style={{ marginTop: 10 }}>{texte.titre}</h3>
-            <p className="card-excerpt">{extrait(texte.contenu)}</p>
-            <div className="card-meta">
-              <span className="author">@{texte.udc_users?.pseudo}</span>
-            </div>
-          </a>
+        {visibles.map((texte, i) => (
+          <div key={texte.id} style={{ display: 'contents' }}>
+            {ads.length > 0 && i > 0 && i % INTERVALLE_PUB === 0 && (
+              <AdCard ad={ads[(i / INTERVALLE_PUB - 1) % ads.length]} />
+            )}
+            <a href={`/textes/${texte.id}`} className={`card card-${texte.categorie}`}>
+              <span className={`badge ${texte.categorie}`}>
+                {LABELS_CATEGORIE[texte.categorie]}
+              </span>
+              <h3 style={{ marginTop: 10 }}>{texte.titre}</h3>
+              <p className="card-excerpt">{extrait(texte.contenu)}</p>
+              <div className="card-meta">
+                <span className="author">@{texte.udc_users?.pseudo}</span>
+              </div>
+            </a>
+          </div>
         ))}
       </div>
     </>

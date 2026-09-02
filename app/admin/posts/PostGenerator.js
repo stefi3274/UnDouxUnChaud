@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 
 const CATEGORIES = {
-  un_doux: { label: 'Un Doux', color: '#D98CA0' },
-  un_chaud: { label: 'Un Chaud', color: '#6F8F6B' },
-  piment: { label: 'Piment', color: '#CE8B33' },
-  piquant: { label: 'Piquant', color: '#B23A2E' },
-  poemes: { label: 'Poèmes', color: '#8A7CA8' },
+  un_doux: { label: 'Un Doux', color: '#E85D8A' },
+  un_chaud: { label: 'Un Chaud', color: '#3F8F5C' },
+  piment: { label: 'Piment', color: '#E08A1D' },
+  piquant: { label: 'Piquant', color: '#D4321F' },
+  poemes: { label: 'Poèmes', color: '#9B5FC0' },
 };
 
 const SIZE = 1080;
@@ -70,6 +70,33 @@ function fillTextSpaced(ctx, text, x, y, spacing, align = 'left') {
   return total;
 }
 
+function roundRectPath(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function dessinerDrapeauArcEnCiel(ctx, x, y, w, h) {
+  const bandes = ['#E4002B', '#FF8C00', '#FFD500', '#008751', '#0072CE', '#732982'];
+  roundRectPath(ctx, x, y, w, h, 4);
+  ctx.save();
+  ctx.clip();
+  const hBande = h / bandes.length;
+  bandes.forEach((couleur, i) => {
+    ctx.fillStyle = couleur;
+    ctx.fillRect(x, y + i * hBande, w, hBande + 1);
+  });
+  ctx.restore();
+  ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+  ctx.lineWidth = 1;
+  roundRectPath(ctx, x, y, w, h, 4);
+  ctx.stroke();
+}
+
 function drawCover(ctx, img, size) {
   const ratio = Math.max(size / img.width, size / img.height);
   const w = img.width * ratio;
@@ -103,6 +130,7 @@ export default function PostGenerator({ textes }) {
   const [auteur, setAuteur] = useState('');
   const [categorie, setCategorie] = useState('un_doux');
   const [imageUrl, setImageUrl] = useState(null);
+  const [lgbt, setLgbt] = useState(false);
   const [pretAExporter, setPretAExporter] = useState(false);
   const [erreurExport, setErreurExport] = useState('');
   const [chargementImage, setChargementImage] = useState(false);
@@ -115,6 +143,7 @@ export default function PostGenerator({ textes }) {
     setAuteur(t.udc_users?.pseudo || '');
     setCategorie(t.categorie);
     setImageUrl(null);
+    setLgbt(!!(t.orientation_hh || t.orientation_ff));
 
     if (t.image_url) {
       setChargementImage(true);
@@ -179,7 +208,12 @@ export default function PostGenerator({ textes }) {
       ctx.font = '600 15px "Public Sans", sans-serif';
       ctx.fillStyle = 'rgba(255,255,255,0.92)';
       ctx.textBaseline = 'middle';
-      fillTextSpaced(ctx, cat.label.toUpperCase(), MARGE + 20, 98, 3, 'left');
+      const largeurLabel = fillTextSpaced(ctx, cat.label.toUpperCase(), MARGE + 20, 98, 3, 'left');
+
+      // Drapeau arc-en-ciel si le texte est tagué HH / FF
+      if (lgbt) {
+        dessinerDrapeauArcEnCiel(ctx, MARGE + 20 + largeurLabel + 16, 86, 34, 22);
+      }
 
       // Logo, en haut à droite, discret
       ctx.font = 'italic 600 26px Fraunces, serif';
@@ -238,7 +272,7 @@ export default function PostGenerator({ textes }) {
     }
     dessiner();
     return () => { annule = true; };
-  }, [extrait, auteur, categorie, imageUrl]);
+  }, [extrait, auteur, categorie, imageUrl, lgbt]);
 
   function telecharger() {
     const canvas = canvasRef.current;
@@ -334,6 +368,11 @@ export default function PostGenerator({ textes }) {
             ))}
           </div>
         </div>
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24, cursor: 'pointer', fontSize: '0.88rem', fontWeight: 600 }}>
+          <input type="checkbox" checked={lgbt} onChange={(e) => setLgbt(e.target.checked)} />
+          🏳️‍🌈 Contenu Gay/Lesbien (affiche le drapeau arc-en-ciel)
+        </label>
 
         {erreurExport && (
           <p style={{ background: '#FBE7E4', color: '#B23A2E', padding: '10px 14px', borderRadius: 10, marginBottom: 14, fontSize: '0.85rem' }}>
