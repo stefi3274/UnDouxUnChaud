@@ -3,6 +3,7 @@ import { supabasePublic, supabaseAdmin } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
 import HeaderNav from '@/app/components/HeaderNav';
 import TexteInteractions from './TexteInteractions';
+import MessageAuteurButton from './MessageAuteurButton';
 
 const LABELS_CATEGORIE = {
   un_doux: 'Un Doux',
@@ -76,10 +77,13 @@ export default async function TextePage({ params }) {
           {LABELS_CATEGORIE[texte.categorie]}
         </span>
         <h1 style={{ fontFamily: 'Fraunces, serif', marginTop: 10 }}>{texte.titre}</h1>
-        <div style={{ color: '#6B6255', fontSize: '0.88rem', marginTop: 10 }}>
+        <div style={{ color: '#6B6255', fontSize: '0.88rem', marginTop: 10, display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
           <span style={{ color: '#0A5F63', fontWeight: 700 }}>@{texte.udc_users?.pseudo}</span>
           {' · '}
           {texte.date_publication ? new Date(texte.date_publication).toLocaleDateString('fr-FR') : ''}
+          {(!user || user.id !== texte.user_id) && (
+            <MessageAuteurButton auteurId={texte.user_id} connecte={!!user} />
+          )}
         </div>
 
         {texte.avertissements?.length > 0 && (

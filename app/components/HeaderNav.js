@@ -44,6 +44,11 @@ export default function HeaderNav({ user }) {
               <span aria-hidden="true">👤</span> Mon profil
             </a>
           )}
+          {!pathname.startsWith('/messages') && (
+            <a href="/messages" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span aria-hidden="true">💬</span> Messages
+            </a>
+          )}
           {user.role === 'admin' && pathname !== '/admin' && (
             <a href="/admin" style={{ color: '#0A5F63', textDecoration: 'none', fontWeight: 700 }}>Admin</a>
           )}
@@ -55,6 +60,11 @@ export default function HeaderNav({ user }) {
           {user.role === 'admin' && pathname !== '/admin/pubs' && (
             <a href="/admin/pubs" style={{ color: '#0A5F63', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
               <span aria-hidden="true">📣</span> Pubs
+            </a>
+          )}
+          {user.role === 'admin' && pathname !== '/admin/signalements' && (
+            <a href="/admin/signalements" style={{ color: '#0A5F63', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span aria-hidden="true">🚩</span> Signalements
             </a>
           )}
           <span style={{ color: '#6B6255', fontSize: '0.85rem' }}>@{user.pseudo}</span>
