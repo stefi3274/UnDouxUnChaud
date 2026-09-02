@@ -11,11 +11,12 @@ export async function POST(request) {
   if (!email) {
     return NextResponse.json({ error: 'E-mail requis.' }, { status: 400 });
   }
+  const emailNormalise = email.trim().toLowerCase();
 
   const { data: utilisateur } = await supabaseAdmin
     .from('udc_users')
     .select('id, pseudo, email')
-    .eq('email', email)
+    .ilike('email', emailNormalise)
     .maybeSingle();
 
   // Toujours la même réponse, que le compte existe ou non : on ne

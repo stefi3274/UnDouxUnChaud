@@ -9,8 +9,9 @@ export async function POST(request) {
   if (!pseudo || !motdepasse || !email) {
     return NextResponse.json({ error: 'Pseudo, e-mail et mot de passe sont requis.' }, { status: 400 });
   }
+  const emailNormalise = email.trim().toLowerCase();
   const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!EMAIL_REGEX.test(email)) {
+  if (!EMAIL_REGEX.test(emailNormalise)) {
     return NextResponse.json({ error: "Adresse e-mail invalide." }, { status: 400 });
   }
   if (motdepasse.length < 8) {
@@ -32,7 +33,7 @@ export async function POST(request) {
   const { data: emailExistant } = await supabaseAdmin
     .from('udc_users')
     .select('id')
-    .eq('email', email)
+    .eq('email', emailNormalise)
     .maybeSingle();
 
   if (emailExistant) {
@@ -43,7 +44,7 @@ export async function POST(request) {
 
   const { data: nouvelUtilisateur, error } = await supabaseAdmin
     .from('udc_users')
-    .insert({ pseudo, password_hash, email })
+    .insert({ pseudo, password_hash, email: emailNormalise })
     .select('id, pseudo, role')
     .single();
 
