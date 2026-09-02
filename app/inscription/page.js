@@ -25,7 +25,7 @@ export default function InscriptionPage() {
     const res = await fetch('/api/auth/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pseudo, motdepasse, email: email || undefined }),
+      body: JSON.stringify({ pseudo, motdepasse, email }),
     });
     const data = await res.json();
     setChargement(false);
@@ -73,6 +73,19 @@ export default function InscriptionPage() {
 
       <form onSubmit={handleSubmit} style={{ marginTop: 20 }}>
         <div style={{ marginBottom: 16 }}>
+          <label style={labelStyle}>E-mail</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            style={inputStyle}
+          />
+          <p style={{ fontSize: '0.78rem', color: '#6B6255', marginTop: 6 }}>
+            Ton e-mail ne sera jamais public. Seul ton pseudo sera visible : c'est lui qui apparaît sur tes publications, commentaires, likes et partages.
+          </p>
+        </div>
+        <div style={{ marginBottom: 16 }}>
           <label style={labelStyle}>Pseudo</label>
           <input
             type="text"
@@ -82,7 +95,7 @@ export default function InscriptionPage() {
             style={inputStyle}
           />
         </div>
-        <div style={{ marginBottom: 16 }}>
+        <div style={{ marginBottom: 20 }}>
           <label style={labelStyle}>Mot de passe (8 caractères minimum)</label>
           <input
             type="password"
@@ -90,15 +103,6 @@ export default function InscriptionPage() {
             onChange={(e) => setMotdepasse(e.target.value)}
             required
             minLength={8}
-            style={inputStyle}
-          />
-        </div>
-        <div style={{ marginBottom: 20 }}>
-          <label style={labelStyle}>Email <span style={{ textTransform: 'none', fontWeight: 400 }}>(optionnel)</span></label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             style={inputStyle}
           />
         </div>

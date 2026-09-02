@@ -47,6 +47,11 @@ export default function HeaderNav({ user }) {
           {user.role === 'admin' && pathname !== '/admin' && (
             <a href="/admin" style={{ color: '#0A5F63', textDecoration: 'none', fontWeight: 700 }}>Admin</a>
           )}
+          {user.role === 'admin' && pathname !== '/admin/posts' && (
+            <a href="/admin/posts" style={{ color: '#0A5F63', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span aria-hidden="true">🖼️</span> Posts
+            </a>
+          )}
           <span style={{ color: '#6B6255', fontSize: '0.85rem' }}>@{user.pseudo}</span>
           <button onClick={handleLogout} className="btn-outline" style={{ padding: '8px 18px' }}>
             Se déconnecter
