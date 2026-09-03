@@ -150,9 +150,13 @@ export default function EcrireForm() {
   return (
     <main style={{ maxWidth: 640, margin: '0 auto', padding: '5vw 6vw 8vw' }}>
       <h1 style={{ fontFamily: 'Fraunces, serif' }}>Écrire un texte</h1>
-      <p style={{ color: '#6B6255', marginTop: 8, marginBottom: 24 }}>
-        Ton texte sera relu avant publication, réponse sous 72h à une semaine.
-      </p>
+      <div style={{
+        display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 10, marginBottom: 24,
+        background: '#E3F1EF', color: '#0A5F63', padding: '8px 16px', borderRadius: 100,
+        fontSize: '0.82rem', fontWeight: 600,
+      }}>
+        ⏱️ Relu et publié sous 72h à 1 semaine
+      </div>
 
       {erreur && (
         <p style={{ background: '#FBE7E4', color: '#B23A2E', padding: '10px 14px', borderRadius: 10, marginBottom: 18 }}>

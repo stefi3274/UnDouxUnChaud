@@ -4,6 +4,7 @@ import { getSessionUser } from '@/lib/auth';
 import HeaderNav from '@/app/components/HeaderNav';
 import TexteInteractions from './TexteInteractions';
 import MessageAuteurButton from './MessageAuteurButton';
+import { urlAvatar } from '@/lib/avatar';
 
 const LABELS_CATEGORIE = {
   un_doux: 'Un Doux',
@@ -16,7 +17,7 @@ const LABELS_CATEGORIE = {
 async function getTexte(id) {
   const { data } = await supabasePublic
     .from('udc_textes')
-    .select('*, udc_users(pseudo)')
+    .select('*, udc_users(pseudo, avatar_path)')
     .eq('id', id)
     .eq('statut', 'accepte')
     .maybeSingle();
@@ -78,6 +79,12 @@ export default async function TextePage({ params }) {
         </span>
         <h1 style={{ fontFamily: 'Fraunces, serif', marginTop: 10 }}>{texte.titre}</h1>
         <div style={{ color: '#6B6255', fontSize: '0.88rem', marginTop: 10, display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+          {(() => {
+            const avatar = urlAvatar(texte.udc_users?.avatar_path);
+            return avatar ? (
+              <img src={avatar} alt="" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover', marginRight: 8 }} />
+            ) : null;
+          })()}
           <span style={{ color: '#0A5F63', fontWeight: 700 }}>@{texte.udc_users?.pseudo}</span>
           {' · '}
           {texte.date_publication ? new Date(texte.date_publication).toLocaleDateString('fr-FR') : ''}

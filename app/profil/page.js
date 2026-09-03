@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation';
 import { getSessionUser } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import HeaderNav from '@/app/components/HeaderNav';
+import AvatarUpload from './AvatarUpload';
+import { urlAvatar } from '@/lib/avatar';
 
 const LABELS_CATEGORIE = {
   un_doux: 'Un Doux',
@@ -35,11 +37,20 @@ export default async function ProfilPage() {
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
+  const { data: moi } = await supabaseAdmin
+    .from('udc_users')
+    .select('avatar_path')
+    .eq('id', user.id)
+    .maybeSingle();
+
   return (
     <>
       <HeaderNav user={user} />
       <main style={{ maxWidth: 720, margin: '0 auto', padding: '5vw 6vw 8vw' }}>
-        <h1 style={{ fontFamily: 'Fraunces, serif' }}>@{user.pseudo}</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+          <AvatarUpload avatarUrl={urlAvatar(moi?.avatar_path)} pseudo={user.pseudo} />
+          <h1 style={{ fontFamily: 'Fraunces, serif' }}>@{user.pseudo}</h1>
+        </div>
 
         <h2 style={{ fontFamily: 'Fraunces, serif', fontSize: '1.1rem', marginTop: 32, marginBottom: 16 }}>
           Mes textes
@@ -68,6 +79,11 @@ export default async function ProfilPage() {
               {t.statut === 'refuse' && t.raison_refus && (
                 <div style={{ marginTop: 10, background: '#FBE7E4', color: '#8A3226', borderRadius: 10, padding: '10px 14px', fontSize: '0.85rem' }}>
                   <strong>Raison du refus :</strong> {t.raison_refus}
+                </div>
+              )}
+              {t.statut === 'en_attente' && (
+                <div style={{ marginTop: 10, fontSize: '0.8rem', color: '#6B6255' }}>
+                  ⏱️ Réponse sous 72h à 1 semaine
                 </div>
               )}
             </div>

@@ -10,7 +10,7 @@ export async function GET() {
 
   const { data: conversations, error } = await supabaseAdmin
     .from('udc_conversations')
-    .select('id, user1_id, user2_id, created_at, udc_users_user1:user1_id(pseudo), udc_users_user2:user2_id(pseudo)')
+    .select('id, user1_id, user2_id, created_at, udc_users_user1:user1_id(pseudo, avatar_path), udc_users_user2:user2_id(pseudo, avatar_path)')
     .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`)
     .order('created_at', { ascending: false });
 
@@ -27,6 +27,7 @@ export async function GET() {
   const resultats = await Promise.all(
     (conversations || []).map(async (c) => {
       const autrePseudo = c.user1_id === user.id ? c.udc_users_user2?.pseudo : c.udc_users_user1?.pseudo;
+      const autreAvatar = c.user1_id === user.id ? c.udc_users_user2?.avatar_path : c.udc_users_user1?.avatar_path;
       const autreId = c.user1_id === user.id ? c.user2_id : c.user1_id;
 
       const { data: dernierMessage } = await supabaseAdmin
@@ -48,6 +49,7 @@ export async function GET() {
         id: c.id,
         autreId,
         autrePseudo,
+        autreAvatar,
         dernierMessage: dernierMessage?.contenu || null,
         dernierMessageDate: dernierMessage?.created_at || c.created_at,
         nonLus: nonLus || 0,

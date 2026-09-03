@@ -18,7 +18,22 @@ async function getTextesAcceptes() {
     console.error('Erreur chargement textes:', error.message);
     return [];
   }
-  return data;
+
+  const ids = (data || []).map((t) => t.id);
+  if (ids.length === 0) return [];
+
+  const [{ data: likes }, { data: commentaires }] = await Promise.all([
+    supabasePublic.from('udc_likes').select('texte_id').in('texte_id', ids),
+    supabasePublic.from('udc_commentaires').select('texte_id').in('texte_id', ids),
+  ]);
+
+  const compte = (lignes, id) => (lignes || []).filter((l) => l.texte_id === id).length;
+
+  return data.map((t) => ({
+    ...t,
+    likeCount: compte(likes, t.id),
+    commentCount: compte(commentaires, t.id),
+  }));
 }
 
 async function getPubsActives() {
@@ -59,30 +74,6 @@ export default async function HomePage() {
           <a href="#fil" className="btn-outline">Découvrir les textes</a>
         </div>
       </section>
-
-      <div className="scale-strip">
-        <div className="scale-title">L'échelle des saveurs</div>
-        <div className="scale-item">
-          <span className="scale-dot" style={{ background: '#E85D8A' }} />
-          Un Doux
-        </div>
-        <div className="scale-item">
-          <span className="scale-dot" style={{ background: '#3F8F5C' }} />
-          Un Chaud
-        </div>
-        <div className="scale-item">
-          <span className="scale-dot" style={{ background: '#E08A1D' }} />
-          Piment
-        </div>
-        <div className="scale-item">
-          <span className="scale-dot" style={{ background: '#D4321F' }} />
-          Piquant
-        </div>
-        <div className="scale-item">
-          <span className="scale-dot" style={{ background: '#9B5FC0' }} />
-          Poèmes
-        </div>
-      </div>
 
       <div id="fil" />
       <AdBanner ads={pubs.banniere} />

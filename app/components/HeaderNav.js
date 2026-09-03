@@ -28,7 +28,7 @@ export default function HeaderNav({ user }) {
         )}
         <div>
           <div className="site-logo">Un<span>Doux</span>UnChaud</div>
-          <div className="site-sub">Magazine littéraire</div>
+          <div className="site-sub">Magazine Érotique</div>
         </div>
       </div>
 

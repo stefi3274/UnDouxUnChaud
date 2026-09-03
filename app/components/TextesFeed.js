@@ -4,12 +4,12 @@ import { useState } from 'react';
 import AdCard from './AdCard';
 
 const CATEGORIES = [
-  { value: 'tout', label: 'Tout' },
-  { value: 'un_doux', label: 'Un Doux' },
-  { value: 'un_chaud', label: 'Un Chaud' },
-  { value: 'piment', label: 'Piment' },
-  { value: 'piquant', label: 'Piquant' },
-  { value: 'poemes', label: 'Poèmes' },
+  { value: 'tout', label: 'Tout', color: null },
+  { value: 'un_doux', label: 'Un Doux', color: '#E85D8A' },
+  { value: 'un_chaud', label: 'Un Chaud', color: '#3F8F5C' },
+  { value: 'piment', label: 'Piment', color: '#E08A1D' },
+  { value: 'piquant', label: 'Piquant', color: '#D4321F' },
+  { value: 'poemes', label: 'Poèmes', color: '#9B5FC0' },
 ];
 
 const LABELS_CATEGORIE = {
@@ -35,15 +35,25 @@ export default function TextesFeed({ textes, hasAccount, ads = [] }) {
   return (
     <>
       <div className="filters">
-        {CATEGORIES.map((c) => (
-          <button
-            key={c.value}
-            className={`chip ${filtre === c.value ? 'active' : ''}`}
-            onClick={() => setFiltre(c.value)}
-          >
-            {c.label}
-          </button>
-        ))}
+        {CATEGORIES.map((c) => {
+          const actif = filtre === c.value;
+          const couleur = c.color || '#2B2620';
+          return (
+            <button
+              key={c.value}
+              onClick={() => setFiltre(c.value)}
+              style={{
+                padding: '9px 18px', borderRadius: 100, fontSize: '0.86rem', fontWeight: 700,
+                border: `1.5px solid ${couleur}`,
+                background: actif ? couleur : '#fff',
+                color: actif ? '#fff' : couleur,
+                cursor: 'pointer', transition: 'transform .12s ease',
+              }}
+            >
+              {c.label}
+            </button>
+          );
+        })}
       </div>
 
       {visibles.length === 0 && (
@@ -75,6 +85,10 @@ export default function TextesFeed({ textes, hasAccount, ads = [] }) {
               <p className="card-excerpt">{extrait(texte.contenu)}</p>
               <div className="card-meta">
                 <span className="author">@{texte.udc_users?.pseudo}</span>
+                <span style={{ display: 'flex', gap: 12 }}>
+                  <span>❤️ {texte.likeCount || 0}</span>
+                  <span>💬 {texte.commentCount || 0}</span>
+                </span>
               </div>
             </a>
           </div>

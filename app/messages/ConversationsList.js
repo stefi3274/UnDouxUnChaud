@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { urlAvatar } from '@/lib/avatar';
 
 function tempsRelatif(dateStr) {
   const diffMs = Date.now() - new Date(dateStr).getTime();
@@ -25,8 +26,13 @@ function LigneConversation({ c }) {
       <div style={{
         width: 42, height: 42, borderRadius: '50%', background: '#F8F3E8', flexShrink: 0,
         display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#0A5F63',
+        overflow: 'hidden',
       }}>
-        {c.autrePseudo?.[0]?.toUpperCase() || '?'}
+        {urlAvatar(c.autreAvatar) ? (
+          <img src={urlAvatar(c.autreAvatar)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        ) : (
+          c.autrePseudo?.[0]?.toUpperCase() || '?'
+        )}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>

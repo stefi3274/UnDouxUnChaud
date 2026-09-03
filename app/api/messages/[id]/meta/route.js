@@ -21,13 +21,13 @@ export async function GET(request, { params }) {
   const autreId = conversation.user1_id === user.id ? conversation.user2_id : conversation.user1_id;
 
   const [{ data: autreUser }, { data: verrou }, { data: utilisateur }] = await Promise.all([
-    supabaseAdmin.from('udc_users').select('pseudo').eq('id', autreId).maybeSingle(),
+    supabaseAdmin.from('udc_users').select('pseudo, avatar_path').eq('id', autreId).maybeSingle(),
     supabaseAdmin.from('udc_conversation_locks').select('id').eq('user_id', user.id).eq('conversation_id', params.id).maybeSingle(),
     supabaseAdmin.from('udc_users').select('lock_pin_hash, lock_type').eq('id', user.id).maybeSingle(),
   ]);
 
   return NextResponse.json({
-    autreUtilisateur: { id: autreId, pseudo: autreUser?.pseudo },
+    autreUtilisateur: { id: autreId, pseudo: autreUser?.pseudo, avatar_path: autreUser?.avatar_path },
     verrouillee: !!verrou,
     aPinDefini: !!utilisateur?.lock_pin_hash,
     typeVerrou: utilisateur?.lock_type || 'pin',

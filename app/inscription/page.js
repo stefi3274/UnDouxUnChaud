@@ -59,7 +59,7 @@ export default function InscriptionPage() {
         }}>⬅️</a>
         <div>
           <div className="site-logo">Un<span>Doux</span>UnChaud</div>
-          <div className="site-sub">Magazine littéraire</div>
+          <div className="site-sub">Magazine Érotique</div>
         </div>
       </header>
 

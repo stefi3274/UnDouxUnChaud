@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { urlAvatar } from '@/lib/avatar';
 
 export default function ConversationView({ conversationId, moi }) {
   const [meta, setMeta] = useState(null); // { autreUtilisateur, verrouillee, aPinDefini }
@@ -238,7 +239,10 @@ export default function ConversationView({ conversationId, moi }) {
             border: '1px solid #DDD2BC', borderRadius: '50%', width: 36, height: 36,
             display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
           }}>⬅️</a>
-          <span style={{ fontWeight: 700, fontFamily: 'Fraunces, serif', fontSize: '1.1rem' }}>
+          <span style={{ fontWeight: 700, fontFamily: 'Fraunces, serif', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+            {urlAvatar(meta?.autreUtilisateur?.avatar_path) ? (
+              <img src={urlAvatar(meta.autreUtilisateur.avatar_path)} alt="" style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover' }} />
+            ) : null}
             @{meta?.autreUtilisateur?.pseudo}
           </span>
         </div>

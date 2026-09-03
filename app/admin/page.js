@@ -11,7 +11,7 @@ export default async function AdminPage() {
 
   const { data: textesRaw } = await supabaseAdmin
     .from('udc_textes')
-    .select('*, udc_users(pseudo)')
+    .select('*, udc_users(pseudo, avatar_path)')
     .eq('statut', 'en_attente')
     .order('date_soumission', { ascending: true });
 
