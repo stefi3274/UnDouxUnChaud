@@ -134,8 +134,12 @@ export default function PostGenerator({ textes }) {
   const [pretAExporter, setPretAExporter] = useState(false);
   const [erreurExport, setErreurExport] = useState('');
   const [chargementImage, setChargementImage] = useState(false);
+  const [afficherTexteComplet, setAfficherTexteComplet] = useState(false);
+
+  const texteSelectionne = textes.find((x) => String(x.id) === String(texteId));
 
   async function choisirTexte(id) {
+    setAfficherTexteComplet(false);
     setTexteId(id);
     const t = textes.find((x) => String(x.id) === String(id));
     if (!t) return;
@@ -230,7 +234,7 @@ export default function PostGenerator({ textes }) {
       ctx.font = `italic 500 ${fontSize}px Fraunces, serif`;
       ctx.fillStyle = '#FFFFFF';
       ctx.textBaseline = 'alphabetic';
-      const baseAncrage = 758;
+      const baseAncrage = 610;
       let y = baseAncrage - (lines.length - 1) * lineHeight;
       for (const ligne of lines) {
         ctx.fillText(ligne, MARGE, y);
@@ -336,6 +340,30 @@ export default function PostGenerator({ textes }) {
             style={{ ...inputStyle, minHeight: 120, resize: 'vertical', lineHeight: 1.5 }}
             placeholder="Colle ou ajuste l'extrait à mettre en avant..."
           />
+          {texteSelectionne && (
+            <>
+              <button
+                type="button"
+                onClick={() => setAfficherTexteComplet((v) => !v)}
+                style={{
+                  background: 'none', border: 'none', color: '#0A5F63', fontWeight: 600,
+                  fontSize: '0.82rem', cursor: 'pointer', padding: 0, marginTop: 8,
+                }}
+              >
+                {afficherTexteComplet ? '▲ Masquer le texte complet' : '▼ Voir le texte complet pour choisir un autre passage'}
+              </button>
+              {afficherTexteComplet && (
+                <div style={{
+                  marginTop: 10, maxHeight: 260, overflowY: 'auto', padding: '14px 16px',
+                  background: '#fff', border: '1px solid #DDD2BC', borderRadius: 10,
+                  fontFamily: 'Fraunces, serif', fontSize: '0.92rem', lineHeight: 1.7,
+                  whiteSpace: 'pre-wrap', color: '#2B2620',
+                }}>
+                  {texteSelectionne.contenu}
+                </div>
+              )}
+            </>
+          )}
         </div>
 
         <div style={{ marginBottom: 20 }}>

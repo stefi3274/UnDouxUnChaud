@@ -1,23 +1,40 @@
 'use client';
 import Link from 'next/link';
-
-import { useRouter, usePathname } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 export default function HeaderNav({ user }) {
-  const router = useRouter();
   const pathname = usePathname();
   const estAccueil = pathname === '/';
+  const [ouvert, setOuvert] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => { setOuvert(false); }, [pathname]);
+
+  useEffect(() => {
+    function fermerSiExterieur(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setOuvert(false);
+    }
+    document.addEventListener('mousedown', fermerSiExterieur);
+    return () => document.removeEventListener('mousedown', fermerSiExterieur);
+  }, []);
 
   async function handleLogout() {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/');
-    router.refresh();
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch {
+      // même en cas d'erreur réseau, on force quand même le retour à l'accueil
+    }
+    window.location.href = '/';
   }
+
+  const lienStyle = { color: '#2B2620', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8, padding: '10px 4px' };
+  const lienAdminStyle = { ...lienStyle, color: '#0A5F63', fontWeight: 700 };
 
   return (
     <header style={{
-      display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-      gap: 16, flexWrap: 'wrap', padding: '20px 6vw', borderBottom: '1px solid #DDD2BC',
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      gap: 16, padding: '18px 6vw', borderBottom: '1px solid #DDD2BC', position: 'relative',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
         {!estAccueil && (
@@ -33,60 +50,81 @@ export default function HeaderNav({ user }) {
         </div>
       </div>
 
-      {user ? (
-        <nav style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
-          {pathname !== '/ecrire' && (
-            <Link href="/ecrire" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span aria-hidden="true">✍️</span> Écrire
-            </Link>
-          )}
-          {pathname !== '/profil' && (
-            <Link href="/profil" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span aria-hidden="true">👤</span> Mon profil
-            </Link>
-          )}
-          {!pathname.startsWith('/messages') && (
-            <Link href="/messages" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span aria-hidden="true">💬</span> Messages
-            </Link>
-          )}
-          {user.role === 'admin' && pathname !== '/admin' && (
-            <Link href="/admin" style={{ color: '#0A5F63', textDecoration: 'none', fontWeight: 700 }}>Admin</Link>
-          )}
-          {user.role === 'admin' && pathname !== '/admin/posts' && (
-            <Link href="/admin/posts" style={{ color: '#0A5F63', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span aria-hidden="true">🖼️</span> Posts
-            </Link>
-          )}
-          {user.role === 'admin' && pathname !== '/admin/pubs' && (
-            <Link href="/admin/pubs" style={{ color: '#0A5F63', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span aria-hidden="true">📣</span> Pubs
-            </Link>
-          )}
-          {user.role === 'admin' && pathname !== '/admin/signalements' && (
-            <Link href="/admin/signalements" style={{ color: '#0A5F63', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span aria-hidden="true">🚩</span> Signalements
-            </Link>
-          )}
-          <span style={{ color: '#6B6255', fontSize: '0.85rem' }}>@{user.pseudo}</span>
-          <button onClick={handleLogout} className="btn-outline" style={{ padding: '8px 18px' }}>
-            Se déconnecter
-          </button>
-        </nav>
-      ) : (
-        <nav style={{ display: 'flex', gap: 16 }}>
-          {pathname !== '/inscription' && (
-            <Link href="/inscription" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600 }}>
-              Créer un compte
-            </Link>
-          )}
-          {pathname !== '/connexion' && (
-            <Link href="/connexion" className="btn-turquoise">
-              Se connecter
-            </Link>
-          )}
-        </nav>
-      )}
+      <div ref={menuRef} style={{ position: 'relative' }}>
+        <button
+          type="button"
+          onClick={() => setOuvert((v) => !v)}
+          aria-label="Menu"
+          aria-expanded={ouvert}
+          style={{
+            width: 44, height: 44, borderRadius: '50%', border: '1px solid #DDD2BC',
+            background: ouvert ? '#2B2620' : '#fff', color: ouvert ? '#fff' : '#2B2620',
+            fontSize: '1.2rem', cursor: 'pointer', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', flexShrink: 0,
+          }}
+        >
+          {ouvert ? '✕' : '☰'}
+        </button>
+
+        {ouvert && (
+          <nav style={{
+            position: 'absolute', right: 0, top: '120%', background: '#fff',
+            border: '1px solid #DDD2BC', borderRadius: 14, boxShadow: '0 10px 30px rgba(43,38,32,0.14)',
+            padding: '10px 16px', minWidth: 220, display: 'flex', flexDirection: 'column',
+            zIndex: 50,
+          }}>
+            {user ? (
+              <>
+                <div style={{ color: '#6B6255', fontSize: '0.85rem', padding: '8px 4px', borderBottom: '1px solid #DDD2BC', marginBottom: 4 }}>
+                  @{user.pseudo}
+                </div>
+                {pathname !== '/ecrire' && (
+                  <Link href="/ecrire" style={lienStyle}><span aria-hidden="true">✍️</span> Écrire</Link>
+                )}
+                {pathname !== '/profil' && (
+                  <Link href="/profil" style={lienStyle}><span aria-hidden="true">👤</span> Mon profil</Link>
+                )}
+                {!pathname.startsWith('/messages') && (
+                  <Link href="/messages" style={lienStyle}><span aria-hidden="true">💬</span> Messages</Link>
+                )}
+                {user.role === 'admin' && (
+                  <>
+                    <div style={{ borderTop: '1px solid #DDD2BC', margin: '6px 0' }} />
+                    {pathname !== '/admin' && (
+                      <Link href="/admin" style={lienAdminStyle}><span aria-hidden="true">🛠️</span> Admin</Link>
+                    )}
+                    {pathname !== '/admin/posts' && (
+                      <Link href="/admin/posts" style={lienAdminStyle}><span aria-hidden="true">🖼️</span> Posts</Link>
+                    )}
+                    {pathname !== '/admin/pubs' && (
+                      <Link href="/admin/pubs" style={lienAdminStyle}><span aria-hidden="true">📣</span> Pubs</Link>
+                    )}
+                    {pathname !== '/admin/signalements' && (
+                      <Link href="/admin/signalements" style={lienAdminStyle}><span aria-hidden="true">🚩</span> Signalements</Link>
+                    )}
+                  </>
+                )}
+                <div style={{ borderTop: '1px solid #DDD2BC', margin: '6px 0' }} />
+                <button
+                  onClick={handleLogout}
+                  style={{ ...lienStyle, background: 'none', border: 'none', cursor: 'pointer', color: '#B23A2E', textAlign: 'left', width: '100%' }}
+                >
+                  Se déconnecter
+                </button>
+              </>
+            ) : (
+              <>
+                {pathname !== '/inscription' && (
+                  <Link href="/inscription" style={lienStyle}>Créer un compte</Link>
+                )}
+                {pathname !== '/connexion' && (
+                  <Link href="/connexion" style={lienStyle}>Se connecter</Link>
+                )}
+              </>
+            )}
+          </nav>
+        )}
+      </div>
     </header>
   );
 }
