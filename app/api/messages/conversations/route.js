@@ -18,6 +18,12 @@ export async function GET() {
     return NextResponse.json({ error: 'Erreur de chargement.' }, { status: 500 });
   }
 
+  const { data: verrous } = await supabaseAdmin
+    .from('udc_conversation_locks')
+    .select('conversation_id')
+    .eq('user_id', user.id);
+  const idsVerrouilles = new Set((verrous || []).map((v) => v.conversation_id));
+
   const resultats = await Promise.all(
     (conversations || []).map(async (c) => {
       const autrePseudo = c.user1_id === user.id ? c.udc_users_user2?.pseudo : c.udc_users_user1?.pseudo;
@@ -45,6 +51,7 @@ export async function GET() {
         dernierMessage: dernierMessage?.contenu || null,
         dernierMessageDate: dernierMessage?.created_at || c.created_at,
         nonLus: nonLus || 0,
+        verrouillee: idsVerrouilles.has(c.id),
       };
     })
   );
