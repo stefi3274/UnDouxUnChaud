@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { getSessionUser } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import HeaderNav from '@/app/components/HeaderNav';
@@ -31,7 +32,7 @@ export default async function AdminPage() {
       <main style={{ maxWidth: 780, margin: '0 auto', padding: '5vw 6vw 8vw' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
           <h1 style={{ fontFamily: 'Fraunces, serif' }}>File d'attente</h1>
-          <a href="/admin/posts" className="btn-outline" style={{ padding: '9px 18px' }}>🖼️ Créer un post</a>
+          <Link href="/admin/posts" className="btn-outline" style={{ padding: '9px 18px' }}>🖼️ Créer un post</Link>
         </div>
         <p style={{ color: '#6B6255', marginTop: 8 }}>
           {textes?.length || 0} texte{(textes?.length || 0) > 1 ? 's' : ''} en attente de relecture.

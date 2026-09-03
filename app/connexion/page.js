@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PasswordInput from '@/app/components/PasswordInput';
@@ -46,11 +47,11 @@ export default function ConnexionPage() {
   return (
     <>
     <header style={{ padding: '20px 6vw', display: 'flex', alignItems: 'center', gap: 14, borderBottom: '1px solid #DDD2BC' }}>
-        <a href="/" aria-label="Retour à l'accueil" style={{
+        <Link href="/" aria-label="Retour à l'accueil" style={{
           fontSize: '1.2rem', textDecoration: 'none', color: '#2B2620',
           border: '1px solid #DDD2BC', borderRadius: '50%', width: 40, height: 40,
           display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-        }}>⬅️</a>
+        }}>⬅️</Link>
         <div>
           <div className="site-logo">Un<span>Doux</span>UnChaud</div>
           <div className="site-sub">Magazine Érotique</div>
@@ -90,9 +91,9 @@ export default function ConnexionPage() {
           {chargement ? 'Connexion...' : 'Se connecter'}
         </button>
       </form>
-      <a href="/mot-de-passe-oublie" style={{ display: 'block', textAlign: 'center', marginTop: 16, fontSize: '0.85rem', color: '#0A5F63' }}>
+      <Link href="/mot-de-passe-oublie" style={{ display: 'block', textAlign: 'center', marginTop: 16, fontSize: '0.85rem', color: '#0A5F63' }}>
         Mot de passe oublié ?
-      </a>
+      </Link>
     </main>
     </>
   );

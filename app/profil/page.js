@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { getSessionUser } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import HeaderNav from '@/app/components/HeaderNav';
@@ -102,7 +103,7 @@ export default async function ProfilPage() {
             padding: '16px 18px', marginBottom: 14,
           }}>
             <div style={{ fontSize: '0.8rem', color: '#6B6255', marginBottom: 6 }}>
-              Sur <a href={`/textes/${c.texte_id}`} style={{ color: '#0A5F63', fontWeight: 700 }}>{c.udc_textes?.titre}</a>
+              Sur <Link href={`/textes/${c.texte_id}`} style={{ color: '#0A5F63', fontWeight: 700 }}>{c.udc_textes?.titre}</Link>
               {' · '}{new Date(c.created_at).toLocaleDateString('fr-FR')}
             </div>
             <p style={{ fontSize: '0.9rem' }}>{c.contenu}</p>

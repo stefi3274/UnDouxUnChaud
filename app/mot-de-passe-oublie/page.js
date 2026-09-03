@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 
 export default function MotDePasseOubliePage() {
@@ -41,11 +42,11 @@ export default function MotDePasseOubliePage() {
   return (
     <>
       <header style={{ padding: '20px 6vw', display: 'flex', alignItems: 'center', gap: 14, borderBottom: '1px solid #DDD2BC' }}>
-        <a href="/connexion" aria-label="Retour à la connexion" style={{
+        <Link href="/connexion" aria-label="Retour à la connexion" style={{
           fontSize: '1.2rem', textDecoration: 'none', color: '#2B2620',
           border: '1px solid #DDD2BC', borderRadius: '50%', width: 40, height: 40,
           display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-        }}>⬅️</a>
+        }}>⬅️</Link>
         <div>
           <div className="site-logo">Un<span>Doux</span>UnChaud</div>
           <div className="site-sub">Magazine Érotique</div>

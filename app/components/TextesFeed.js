@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import AdCard from './AdCard';
 
 const CATEGORIES = [
@@ -61,9 +62,9 @@ export default function TextesFeed({ textes, hasAccount, ads = [] }) {
           {textes.length === 0 ? (
             <>
               Aucun texte publié pour le moment. Sois la première plume à écrire ici —{' '}
-              <a href={hasAccount ? '/ecrire' : '/inscription'}>
+              <Link href={hasAccount ? '/ecrire' : '/inscription'}>
                 {hasAccount ? 'écrire un texte' : "créer un compte pour écrire"}
-              </a>.
+              </Link>.
             </>
           ) : (
             <>Aucun texte dans cette catégorie pour l'instant. Reviens bientôt, ou tente-toi à en écrire un.</>
@@ -77,7 +78,7 @@ export default function TextesFeed({ textes, hasAccount, ads = [] }) {
             {ads.length > 0 && i > 0 && i % INTERVALLE_PUB === 0 && (
               <AdCard ad={ads[(i / INTERVALLE_PUB - 1) % ads.length]} />
             )}
-            <a href={`/textes/${texte.id}`} className={`card card-${texte.categorie}`}>
+            <Link href={`/textes/${texte.id}`} className={`card card-${texte.categorie}`}>
               <span className={`badge ${texte.categorie}`}>
                 {LABELS_CATEGORIE[texte.categorie]}
               </span>
@@ -90,7 +91,7 @@ export default function TextesFeed({ textes, hasAccount, ads = [] }) {
                   <span>💬 {texte.commentCount || 0}</span>
                 </span>
               </div>
-            </a>
+            </Link>
           </div>
         ))}
       </div>

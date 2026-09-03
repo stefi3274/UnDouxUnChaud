@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -125,7 +126,7 @@ export default function TexteInteractions({ texteId, auteurId, initialLikes, ini
             background: '#F8F3E8', border: '1px dashed #DDD2BC', borderRadius: 14,
             padding: 20, textAlign: 'center', color: '#6B6255', marginBottom: 28,
           }}>
-            <a href="/connexion" style={{ color: '#0A5F63', fontWeight: 700 }}>Connecte-toi</a> pour aimer ou commenter ce texte.
+            <Link href="/connexion" style={{ color: '#0A5F63', fontWeight: 700 }}>Connecte-toi</Link> pour aimer ou commenter ce texte.
           </p>
         )}
 

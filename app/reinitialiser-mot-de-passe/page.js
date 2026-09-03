@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import PasswordInput from '@/app/components/PasswordInput';
@@ -56,9 +57,9 @@ function FormulaireReinitialisation() {
         <p style={{ color: '#6B6255', marginTop: 8 }}>
           Ce lien de réinitialisation est incomplet. Refais une demande depuis la page de connexion.
         </p>
-        <a href="/mot-de-passe-oublie" className="btn-primary" style={{ display: 'inline-block', marginTop: 20 }}>
+        <Link href="/mot-de-passe-oublie" className="btn-primary" style={{ display: 'inline-block', marginTop: 20 }}>
           Refaire une demande
-        </a>
+        </Link>
       </main>
     );
   }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { urlAvatar } from '@/lib/avatar';
 
 export default function ConversationView({ conversationId, moi }) {
@@ -220,9 +221,9 @@ export default function ConversationView({ conversationId, moi }) {
             Déverrouiller
           </button>
         </form>
-        <a href="/messages" style={{ display: 'block', marginTop: 20, fontSize: '0.85rem', color: '#6B6255' }}>
+        <Link href="/messages" style={{ display: 'block', marginTop: 20, fontSize: '0.85rem', color: '#6B6255' }}>
           ⬅️ Retour aux messages
-        </a>
+        </Link>
       </div>
     );
   }
@@ -234,11 +235,11 @@ export default function ConversationView({ conversationId, moi }) {
         padding: '14px 0', borderBottom: '1px solid #DDD2BC',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <a href="/messages" aria-label="Retour aux messages" style={{
+          <Link href="/messages" aria-label="Retour aux messages" style={{
             fontSize: '1.1rem', textDecoration: 'none', color: '#2B2620',
             border: '1px solid #DDD2BC', borderRadius: '50%', width: 36, height: 36,
             display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-          }}>⬅️</a>
+          }}>⬅️</Link>
           <span style={{ fontWeight: 700, fontFamily: 'Fraunces, serif', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
             {urlAvatar(meta?.autreUtilisateur?.avatar_path) ? (
               <img src={urlAvatar(meta.autreUtilisateur.avatar_path)} alt="" style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover' }} />

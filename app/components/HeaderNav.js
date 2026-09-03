@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 
 import { useRouter, usePathname } from 'next/navigation';
 
@@ -20,11 +21,11 @@ export default function HeaderNav({ user }) {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
         {!estAccueil && (
-          <a href="/" aria-label="Retour à l'accueil" style={{
+          <Link href="/" aria-label="Retour à l'accueil" style={{
             fontSize: '1.2rem', textDecoration: 'none', color: '#2B2620',
             border: '1px solid #DDD2BC', borderRadius: '50%', width: 40, height: 40,
             display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-          }}>⬅️</a>
+          }}>⬅️</Link>
         )}
         <div>
           <div className="site-logo">Un<span>Doux</span>UnChaud</div>
@@ -35,37 +36,37 @@ export default function HeaderNav({ user }) {
       {user ? (
         <nav style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
           {pathname !== '/ecrire' && (
-            <a href="/ecrire" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Link href="/ecrire" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
               <span aria-hidden="true">✍️</span> Écrire
-            </a>
+            </Link>
           )}
           {pathname !== '/profil' && (
-            <a href="/profil" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Link href="/profil" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
               <span aria-hidden="true">👤</span> Mon profil
-            </a>
+            </Link>
           )}
           {!pathname.startsWith('/messages') && (
-            <a href="/messages" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Link href="/messages" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
               <span aria-hidden="true">💬</span> Messages
-            </a>
+            </Link>
           )}
           {user.role === 'admin' && pathname !== '/admin' && (
-            <a href="/admin" style={{ color: '#0A5F63', textDecoration: 'none', fontWeight: 700 }}>Admin</a>
+            <Link href="/admin" style={{ color: '#0A5F63', textDecoration: 'none', fontWeight: 700 }}>Admin</Link>
           )}
           {user.role === 'admin' && pathname !== '/admin/posts' && (
-            <a href="/admin/posts" style={{ color: '#0A5F63', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Link href="/admin/posts" style={{ color: '#0A5F63', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
               <span aria-hidden="true">🖼️</span> Posts
-            </a>
+            </Link>
           )}
           {user.role === 'admin' && pathname !== '/admin/pubs' && (
-            <a href="/admin/pubs" style={{ color: '#0A5F63', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Link href="/admin/pubs" style={{ color: '#0A5F63', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
               <span aria-hidden="true">📣</span> Pubs
-            </a>
+            </Link>
           )}
           {user.role === 'admin' && pathname !== '/admin/signalements' && (
-            <a href="/admin/signalements" style={{ color: '#0A5F63', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Link href="/admin/signalements" style={{ color: '#0A5F63', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
               <span aria-hidden="true">🚩</span> Signalements
-            </a>
+            </Link>
           )}
           <span style={{ color: '#6B6255', fontSize: '0.85rem' }}>@{user.pseudo}</span>
           <button onClick={handleLogout} className="btn-outline" style={{ padding: '8px 18px' }}>
@@ -75,14 +76,14 @@ export default function HeaderNav({ user }) {
       ) : (
         <nav style={{ display: 'flex', gap: 16 }}>
           {pathname !== '/inscription' && (
-            <a href="/inscription" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600 }}>
+            <Link href="/inscription" style={{ color: '#2B2620', textDecoration: 'none', fontWeight: 600 }}>
               Créer un compte
-            </a>
+            </Link>
           )}
           {pathname !== '/connexion' && (
-            <a href="/connexion" className="btn-turquoise">
+            <Link href="/connexion" className="btn-turquoise">
               Se connecter
-            </a>
+            </Link>
           )}
         </nav>
       )}

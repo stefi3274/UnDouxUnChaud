@@ -1,5 +1,6 @@
 import { supabasePublic } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
+import Link from 'next/link';
 import HeaderNav from '@/app/components/HeaderNav';
 import TextesFeed from '@/app/components/TextesFeed';
 import AdBanner from '@/app/components/AdBanner';
@@ -67,9 +68,9 @@ export default async function HomePage() {
         </p>
         <div className="hero-ctas">
           {user ? (
-            <a href="/ecrire" className="btn-primary">✍️ Écrire mon texte</a>
+            <Link href="/ecrire" className="btn-primary">✍️ Écrire mon texte</Link>
           ) : (
-            <a href="/inscription" className="btn-primary">Créer un compte pour écrire</a>
+            <Link href="/inscription" className="btn-primary">Créer un compte pour écrire</Link>
           )}
           <a href="#fil" className="btn-outline">Découvrir les textes</a>
         </div>

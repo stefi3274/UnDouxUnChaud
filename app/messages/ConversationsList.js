@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { urlAvatar } from '@/lib/avatar';
 
 function tempsRelatif(dateStr) {
@@ -16,7 +17,7 @@ function tempsRelatif(dateStr) {
 
 function LigneConversation({ c }) {
   return (
-    <a
+    <Link
       href={`/messages/${c.id}`}
       style={{
         display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', color: 'var(--ink)',
@@ -57,7 +58,7 @@ function LigneConversation({ c }) {
           {c.nonLus}
         </span>
       )}
-    </a>
+    </Link>
   );
 }
 
