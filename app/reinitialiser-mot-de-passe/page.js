@@ -25,20 +25,25 @@ function FormulaireReinitialisation() {
     }
 
     setChargement(true);
-    const res = await fetch('/api/auth/reset-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, motdepasse }),
-    });
-    const data = await res.json();
-    setChargement(false);
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, motdepasse }),
+      });
+      const data = await res.json();
 
-    if (!res.ok) {
-      setErreur(data.error || 'Une erreur est survenue.');
-      return;
+      if (!res.ok) {
+        setErreur(data.error || 'Une erreur est survenue.');
+        return;
+      }
+
+      router.push('/connexion');
+    } catch {
+      setErreur("Impossible de contacter le serveur. Vérifie ta connexion et réessaie.");
+    } finally {
+      setChargement(false);
     }
-
-    router.push('/connexion');
   }
 
   const inputStyle = {

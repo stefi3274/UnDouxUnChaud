@@ -24,21 +24,26 @@ export default function InscriptionPage() {
     }
 
     setChargement(true);
-    const res = await fetch('/api/auth/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pseudo, motdepasse, email }),
-    });
-    const data = await res.json();
-    setChargement(false);
+    try {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pseudo, motdepasse, email }),
+      });
+      const data = await res.json();
 
-    if (!res.ok) {
-      setErreur(data.error || 'Une erreur est survenue.');
-      return;
+      if (!res.ok) {
+        setErreur(data.error || 'Une erreur est survenue.');
+        return;
+      }
+
+      router.push('/');
+      router.refresh();
+    } catch {
+      setErreur("Impossible de contacter le serveur. Vérifie ta connexion et réessaie.");
+    } finally {
+      setChargement(false);
     }
-
-    router.push('/');
-    router.refresh();
   }
 
   const inputStyle = {

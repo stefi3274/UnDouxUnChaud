@@ -17,22 +17,26 @@ export default function ConnexionPage() {
     setErreur('');
     setChargement(true);
 
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pseudo, motdepasse }),
-    });
-    const data = await res.json();
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pseudo, motdepasse }),
+      });
+      const data = await res.json();
 
-    setChargement(false);
+      if (!res.ok) {
+        setErreur(data.error || 'Une erreur est survenue.');
+        return;
+      }
 
-    if (!res.ok) {
-      setErreur(data.error || 'Une erreur est survenue.');
-      return;
+      router.push('/');
+      router.refresh();
+    } catch {
+      setErreur("Impossible de contacter le serveur. Vérifie ta connexion et réessaie.");
+    } finally {
+      setChargement(false);
     }
-
-    router.push('/');
-    router.refresh();
   }
 
   const inputStyle = {
