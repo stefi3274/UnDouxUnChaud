@@ -22,7 +22,7 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Pseudo ou mot de passe incorrect.' }, { status: 401 });
   }
 
-  const motDePasseValide = await bcrypt.compare(motdepasse, utilisateur.password_hash);
+  const motDePasseValide = await bcrypt.compare(motdepasse.trim(), utilisateur.password_hash);
   if (!motDePasseValide) {
     return NextResponse.json({ error: 'Pseudo ou mot de passe incorrect.' }, { status: 401 });
   }

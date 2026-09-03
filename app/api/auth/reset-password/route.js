@@ -4,7 +4,8 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(request) {
-  const { token, motdepasse } = await request.json();
+  const { token, motdepasse: motdepasseBrut } = await request.json();
+  const motdepasse = motdepasseBrut?.trim();
 
   if (!token || !motdepasse) {
     return NextResponse.json({ error: 'Requête invalide.' }, { status: 400 });
@@ -27,10 +28,17 @@ export async function POST(request) {
 
   const password_hash = await bcrypt.hash(motdepasse, 10);
 
-  await supabaseAdmin
+  const { data: misAJour, error: erreurMaj } = await supabaseAdmin
     .from('udc_users')
     .update({ password_hash, reset_token_hash: null, reset_token_expires: null })
-    .eq('id', utilisateur.id);
+    .eq('id', utilisateur.id)
+    .select('id')
+    .maybeSingle();
+
+  if (erreurMaj || !misAJour) {
+    console.error('Erreur mise à jour mot de passe:', erreurMaj?.message);
+    return NextResponse.json({ error: "La mise à jour a échoué côté serveur. Réessaie ou contacte le support." }, { status: 500 });
+  }
 
   return NextResponse.json({ ok: true });
 }
