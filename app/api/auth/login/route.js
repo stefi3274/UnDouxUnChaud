@@ -13,7 +13,7 @@ export async function POST(request) {
   const { data: utilisateur } = await supabaseAdmin
     .from('udc_users')
     .select('id, pseudo, password_hash, role')
-    .eq('pseudo', pseudo)
+    .ilike('pseudo', pseudo.trim())
     .maybeSingle();
 
   // Message volontairement générique : ne pas révéler si c'est le

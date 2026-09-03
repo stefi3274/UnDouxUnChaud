@@ -22,7 +22,7 @@ export async function POST(request) {
   const { data: pseudoExistant } = await supabaseAdmin
     .from('udc_users')
     .select('id')
-    .eq('pseudo', pseudo)
+    .ilike('pseudo', pseudo.trim())
     .maybeSingle();
 
   if (pseudoExistant) {
