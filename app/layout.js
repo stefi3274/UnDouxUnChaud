@@ -1,4 +1,6 @@
 import './globals.css';
+import Footer from './components/Footer';
+import AgeGate from './components/AgeGate';
 
 export const metadata = {
   metadataBase: new URL('https://un-doux-un-chaud.vercel.app'),
@@ -28,7 +30,11 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Footer />
+        <AgeGate />
+      </body>
     </html>
   );
 }
