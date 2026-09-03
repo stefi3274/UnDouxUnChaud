@@ -114,7 +114,11 @@ export default async function TextePage({ params }) {
           </>
         )}
 
-        <div style={{ fontFamily: 'Fraunces, serif', fontSize: '1.1rem', lineHeight: 1.85, marginTop: 28, whiteSpace: 'pre-wrap' }}>
+        <div style={{
+          fontFamily: 'Fraunces, serif', fontSize: '1.1rem', lineHeight: 1.9, marginTop: 28,
+          whiteSpace: 'pre-wrap', color: '#000000', background: '#FFFFFF',
+          padding: '28px 24px', borderRadius: 16, border: '1px solid #DDD2BC',
+        }}>
           {texte.contenu}
         </div>
 

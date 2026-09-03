@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { urlAvatar } from '@/lib/avatar';
+import EmojiPicker from '@/app/components/EmojiPicker';
 
 export default function ConversationView({ conversationId, moi }) {
   const [meta, setMeta] = useState(null); // { autreUtilisateur, verrouillee, aPinDefini }
@@ -23,6 +24,7 @@ export default function ConversationView({ conversationId, moi }) {
   const [nouveauPin, setNouveauPin] = useState('');
   const [erreurCreerPin, setErreurCreerPin] = useState('');
   const finDeFil = useRef(null);
+  const inputRef = useRef(null);
 
   async function chargerMeta() {
     const res = await fetch(`/api/messages/${conversationId}/meta`);
@@ -70,6 +72,19 @@ export default function ConversationView({ conversationId, moi }) {
       setErreurPin('Code incorrect.');
       setPinSaisi('');
     }
+  }
+
+  function insererEmoji(emoji) {
+    const input = inputRef.current;
+    const debut = input?.selectionStart ?? texte.length;
+    const fin = input?.selectionEnd ?? texte.length;
+    const nouveau = texte.slice(0, debut) + emoji + texte.slice(fin);
+    setTexte(nouveau);
+    requestAnimationFrame(() => {
+      input?.focus();
+      const position = debut + emoji.length;
+      input?.setSelectionRange(position, position);
+    });
   }
 
   async function envoyer(e) {
@@ -229,7 +244,7 @@ export default function ConversationView({ conversationId, moi }) {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 90px)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '14px 0', borderBottom: '1px solid #DDD2BC',
@@ -279,7 +294,7 @@ export default function ConversationView({ conversationId, moi }) {
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '16px 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {messages.length === 0 && (
           <p style={{ color: '#6B6255', textAlign: 'center', marginTop: 20 }}>
             Dis bonjour à @{meta?.autreUtilisateur?.pseudo} 👋
@@ -307,8 +322,10 @@ export default function ConversationView({ conversationId, moi }) {
 
       {erreur && <p style={{ color: '#B23A2E', fontSize: '0.85rem' }}>{erreur}</p>}
 
-      <form onSubmit={envoyer} style={{ display: 'flex', gap: 10, padding: '14px 0', borderTop: '1px solid #DDD2BC' }}>
+      <form onSubmit={envoyer} style={{ display: 'flex', gap: 10, padding: '14px 0', borderTop: '1px solid #DDD2BC', flexShrink: 0 }}>
+        <EmojiPicker onSelect={insererEmoji} />
         <input
+          ref={inputRef}
           value={texte}
           onChange={(e) => setTexte(e.target.value)}
           placeholder="Écris un message..."
