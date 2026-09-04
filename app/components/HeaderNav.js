@@ -73,6 +73,9 @@ export default function HeaderNav({ user }) {
             padding: '10px 16px', minWidth: 220, display: 'flex', flexDirection: 'column',
             zIndex: 50,
           }}>
+            {pathname !== '/galerie' && (
+              <Link href="/galerie" style={lienStyle}><span aria-hidden="true">📸</span> Galerie</Link>
+            )}
             {user ? (
               <>
                 <div style={{ color: '#6B6255', fontSize: '0.85rem', padding: '8px 4px', borderBottom: '1px solid #DDD2BC', marginBottom: 4 }}>
@@ -80,6 +83,9 @@ export default function HeaderNav({ user }) {
                 </div>
                 {pathname !== '/ecrire' && (
                   <Link href="/ecrire" style={lienStyle}><span aria-hidden="true">✍️</span> Écrire</Link>
+                )}
+                {pathname !== '/photos/publier' && (
+                  <Link href="/photos/publier" style={lienStyle}><span aria-hidden="true">📷</span> Proposer une photo</Link>
                 )}
                 {pathname !== '/profil' && (
                   <Link href="/profil" style={lienStyle}><span aria-hidden="true">👤</span> Mon profil</Link>
@@ -95,6 +101,9 @@ export default function HeaderNav({ user }) {
                     )}
                     {pathname !== '/admin/posts' && (
                       <Link href="/admin/posts" style={lienAdminStyle}><span aria-hidden="true">🖼️</span> Posts</Link>
+                    )}
+                    {pathname !== '/admin/photos' && (
+                      <Link href="/admin/photos" style={lienAdminStyle}><span aria-hidden="true">📸</span> Photos</Link>
                     )}
                     {pathname !== '/admin/pubs' && (
                       <Link href="/admin/pubs" style={lienAdminStyle}><span aria-hidden="true">📣</span> Pubs</Link>
