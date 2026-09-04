@@ -48,6 +48,7 @@ export default async function TextePage({ params }) {
   const [comments, likeCount] = await Promise.all([
     getCommentaires(texte.id),
     getLikeCount(texte.id),
+    supabaseAdmin.rpc('increment_vues', { texte_id: texte.id }),
   ]);
   const user = getSessionUser();
 
@@ -88,6 +89,7 @@ export default async function TextePage({ params }) {
           <span style={{ color: '#0A5F63', fontWeight: 700 }}>@{texte.udc_users?.pseudo}</span>
           {' · '}
           {texte.date_publication ? new Date(texte.date_publication).toLocaleDateString('fr-FR') : ''}
+          {' · '}👁️ {(texte.vues || 0) + 1} lecture{(texte.vues || 0) + 1 > 1 ? 's' : ''}
           {(!user || user.id !== texte.user_id) && (
             <MessageAuteurButton auteurId={texte.user_id} connecte={!!user} />
           )}

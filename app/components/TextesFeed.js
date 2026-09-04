@@ -87,6 +87,7 @@ export default function TextesFeed({ textes, hasAccount, ads = [] }) {
               <div className="card-meta">
                 <span className="author">@{texte.udc_users?.pseudo}</span>
                 <span style={{ display: 'flex', gap: 12 }}>
+                  <span>👁️ {texte.vues || 0}</span>
                   <span>❤️ {texte.likeCount || 0}</span>
                   <span>💬 {texte.commentCount || 0}</span>
                 </span>

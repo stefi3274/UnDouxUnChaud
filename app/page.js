@@ -10,7 +10,7 @@ import AdBanner from '@/app/components/AdBanner';
 async function getTextesAcceptes() {
   const { data, error } = await supabasePublic
     .from('udc_textes')
-    .select('id, titre, contenu, categorie, date_publication, user_id, udc_users(pseudo)')
+    .select('id, titre, contenu, categorie, date_publication, user_id, vues, udc_users(pseudo)')
     .eq('statut', 'accepte')
     .order('date_publication', { ascending: false })
     .limit(30);

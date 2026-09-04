@@ -76,6 +76,9 @@ export default function HeaderNav({ user }) {
             {pathname !== '/galerie' && (
               <Link href="/galerie" style={lienStyle}><span aria-hidden="true">📸</span> Galerie</Link>
             )}
+            {pathname !== '/audio' && (
+              <Link href="/audio" style={lienStyle}><span aria-hidden="true">🎧</span> Audio</Link>
+            )}
             {user ? (
               <>
                 <div style={{ color: '#6B6255', fontSize: '0.85rem', padding: '8px 4px', borderBottom: '1px solid #DDD2BC', marginBottom: 4 }}>
@@ -86,6 +89,9 @@ export default function HeaderNav({ user }) {
                 )}
                 {pathname !== '/photos/publier' && (
                   <Link href="/photos/publier" style={lienStyle}><span aria-hidden="true">📷</span> Proposer une photo</Link>
+                )}
+                {pathname !== '/audio/publier' && (
+                  <Link href="/audio/publier" style={lienStyle}><span aria-hidden="true">🎙️</span> Proposer un audio</Link>
                 )}
                 {pathname !== '/profil' && (
                   <Link href="/profil" style={lienStyle}><span aria-hidden="true">👤</span> Mon profil</Link>
@@ -104,6 +110,9 @@ export default function HeaderNav({ user }) {
                     )}
                     {pathname !== '/admin/photos' && (
                       <Link href="/admin/photos" style={lienAdminStyle}><span aria-hidden="true">📸</span> Photos</Link>
+                    )}
+                    {pathname !== '/admin/audio' && (
+                      <Link href="/admin/audio" style={lienAdminStyle}><span aria-hidden="true">🎧</span> Audio</Link>
                     )}
                     {pathname !== '/admin/pubs' && (
                       <Link href="/admin/pubs" style={lienAdminStyle}><span aria-hidden="true">📣</span> Pubs</Link>
