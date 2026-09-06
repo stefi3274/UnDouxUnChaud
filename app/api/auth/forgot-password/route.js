@@ -1,7 +1,8 @@
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { envoyerEmail } from '@/lib/email';
+import { envoyerEmail, echapperHtml } from '@/lib/email';
+import { verifierLimite, obtenirIp } from '@/lib/rateLimit';
 
 const MESSAGE_GENERIQUE = "Si un compte existe avec cet e-mail, un lien de réinitialisation vient d'être envoyé.";
 
@@ -12,6 +13,12 @@ export async function POST(request) {
     return NextResponse.json({ error: 'E-mail requis.' }, { status: 400 });
   }
   const emailNormalise = email.trim().toLowerCase();
+
+  const ip = obtenirIp(request);
+  const { autorise } = await verifierLimite(`forgot:${ip}:${emailNormalise}`, 3, 60);
+  if (!autorise) {
+    return NextResponse.json({ error: 'Trop de demandes pour cet e-mail. Réessaie dans une heure.' }, { status: 429 });
+  }
 
   const { data: utilisateur } = await supabaseAdmin
     .from('udc_users')
@@ -42,7 +49,7 @@ export async function POST(request) {
       to: utilisateur.email,
       subject: 'Réinitialise ton mot de passe — UnDouxUnChaud',
       html: `
-        <p>Bonjour @${utilisateur.pseudo},</p>
+        <p>Bonjour @${echapperHtml(utilisateur.pseudo)},</p>
         <p>Tu as demandé à réinitialiser ton mot de passe sur UnDouxUnChaud.</p>
         <p><a href="${lien}">Clique ici pour choisir un nouveau mot de passe</a></p>
         <p>Ce lien expire dans 1 heure. Si tu n'es pas à l'origine de cette demande, ignore simplement cet e-mail.</p>

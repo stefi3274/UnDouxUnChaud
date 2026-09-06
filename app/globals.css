@@ -148,9 +148,28 @@ button {
 /* Hero accueil */
 .hero {
   position: relative;
-  padding: 6vw 6vw 4vw;
-  max-width: 780px;
+  padding: 6vw 6vw 3vw;
+  max-width: 1280px;
+  margin: 0 auto;
   overflow: visible;
+  display: flex;
+  align-items: center;
+  gap: 5vw;
+}
+.hero-texte {
+  flex: 1 1 480px;
+  max-width: 600px;
+}
+.hero-logo {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+}
+.hero-logo img {
+  width: min(340px, 32vw);
+  height: auto;
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(43,38,32,0.14);
 }
 .hero::before {
   content: '';
@@ -168,6 +187,13 @@ button {
   z-index: -1;
   border-radius: 50%;
   pointer-events: none;
+}
+@media (max-width: 860px) {
+  .hero { flex-direction: column-reverse; text-align: center; gap: 24px; }
+  .hero-texte { max-width: 100%; }
+  .hero-ctas { justify-content: center; }
+  .hero p { margin-left: auto; margin-right: auto; }
+  .hero-logo img { width: min(220px, 60vw); }
 }
 .hero h1 {
   font-size: clamp(2rem, 5.5vw, 3.6rem);
@@ -197,6 +223,8 @@ button {
 
 /* Filtres */
 .filters {
+  max-width: 1280px;
+  margin: 0 auto;
   padding: 3vw 6vw 0;
   display: flex;
   gap: 8px;
@@ -219,13 +247,16 @@ button {
 
 /* Grille de textes */
 .feed {
+  max-width: 1280px;
+  margin: 0 auto;
   padding: 4vw 6vw 6vw;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 18px;
 }
 .feed-empty {
-  margin: 4vw 6vw;
+  max-width: 1280px;
+  margin: 4vw auto;
   padding: 40px 24px;
   text-align: center;
   background: var(--beige-card);

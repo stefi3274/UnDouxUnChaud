@@ -7,7 +7,7 @@ const CATEGORIES = {
   un_chaud: { label: 'Un Chaud', color: '#3F8F5C' },
   piment: { label: 'Piment', color: '#E08A1D' },
   piquant: { label: 'Piquant', color: '#D4321F' },
-  poemes: { label: 'Poèmes', color: '#9B5FC0' },
+  poemes: { label: 'Poèmes et Lettres', color: '#9B5FC0' },
 };
 
 const SIZE = 1080;

@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 const CATEGORIES = [
-  { value: 'un_doux', label: 'Un Doux', color: '#D98CA0' },
-  { value: 'un_chaud', label: 'Un Chaud', color: '#6F8F6B' },
-  { value: 'piment', label: 'Piment', color: '#CE8B33' },
-  { value: 'piquant', label: 'Piquant', color: '#B23A2E' },
-  { value: 'poemes', label: 'Poèmes', color: '#8A7CA8' },
+  { value: 'un_doux', label: 'Un Doux', color: '#E85D8A' },
+  { value: 'un_chaud', label: 'Un Chaud', color: '#3F8F5C' },
+  { value: 'piment', label: 'Piment', color: '#E08A1D' },
+  { value: 'piquant', label: 'Piquant', color: '#D4321F' },
+  { value: 'poemes', label: 'Poèmes et Lettres', color: '#9B5FC0' },
 ];
 
 function TagInput({ tags, setTags, placeholder }) {

@@ -31,7 +31,7 @@ export default function ConversationView({ conversationId, moi }) {
     if (!res.ok) { setErreur('Conversation introuvable.'); setChargement(false); return; }
     const data = await res.json();
     setMeta(data);
-    if (!data.verrouillee) setChargement(false);
+    setChargement(false);
   }
 
   useEffect(() => { chargerMeta(); }, [conversationId]);

@@ -9,7 +9,7 @@ const LABELS_CATEGORIE = {
   un_chaud: 'Un Chaud',
   piment: 'Piment',
   piquant: 'Piquant',
-  poemes: 'Poèmes',
+  poemes: 'Poèmes et Lettres',
 };
 const COULEURS_CATEGORIE = {
   un_doux: '#E85D8A',

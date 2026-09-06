@@ -2,12 +2,16 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { supabaseAdmin } from '@/lib/supabase';
 import { createSession } from '@/lib/auth';
+import { verifierLimite, obtenirIp } from '@/lib/rateLimit';
 
 export async function POST(request) {
   const { pseudo, motdepasse, email } = await request.json();
 
   if (!pseudo || !motdepasse || !email) {
     return NextResponse.json({ error: 'Pseudo, e-mail et mot de passe sont requis.' }, { status: 400 });
+  }
+  if (pseudo.trim().length < 2 || pseudo.trim().length > 30) {
+    return NextResponse.json({ error: 'Le pseudo doit faire entre 2 et 30 caractères.' }, { status: 400 });
   }
   const emailNormalise = email.trim().toLowerCase();
   const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -16,6 +20,12 @@ export async function POST(request) {
   }
   if (motdepasse.length < 8) {
     return NextResponse.json({ error: 'Le mot de passe doit faire au moins 8 caractères.' }, { status: 400 });
+  }
+
+  const ip = obtenirIp(request);
+  const { autorise } = await verifierLimite(`signup:${ip}`, 6, 60);
+  if (!autorise) {
+    return NextResponse.json({ error: 'Trop de comptes créés récemment depuis cette connexion. Réessaie plus tard.' }, { status: 429 });
   }
 
   // Vérifie que le pseudo n'existe pas déjà

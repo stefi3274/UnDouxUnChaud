@@ -24,7 +24,7 @@ export default function AProposPage() {
           </p>
           <p style={{ marginTop: 18 }}>
             Ici, chaque texte trouve sa place sur une échelle qui va du tendre au brûlant —
-            Un Doux, Un Chaud, Piment, Piquant, Poèmes — pour que chaque lecteur et
+            Un Doux, Un Chaud, Piment, Piquant, Poèmes et Lettres — pour que chaque lecteur et
             chaque lectrice trouve exactement l'intensité qu'il ou elle cherche.
           </p>
           <p style={{ marginTop: 18 }}>

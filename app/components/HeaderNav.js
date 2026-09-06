@@ -32,9 +32,11 @@ export default function HeaderNav({ user }) {
   const lienAdminStyle = { ...lienStyle, color: '#0A5F63', fontWeight: 700 };
 
   return (
-    <header style={{
+    <header style={{ borderBottom: '1px solid #DDD2BC' }}>
+    <div style={{
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      gap: 16, padding: '18px 6vw', borderBottom: '1px solid #DDD2BC', position: 'relative',
+      gap: 16, padding: '18px 6vw', position: 'relative',
+      maxWidth: 1280, margin: '0 auto',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
         {!estAccueil && (
@@ -143,6 +145,7 @@ export default function HeaderNav({ user }) {
           </nav>
         )}
       </div>
+    </div>
     </header>
   );
 }

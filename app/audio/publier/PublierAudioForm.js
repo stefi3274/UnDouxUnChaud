@@ -9,7 +9,7 @@ const CATEGORIES = [
   { value: 'un_chaud', label: 'Un Chaud', color: '#3F8F5C' },
   { value: 'piment', label: 'Piment', color: '#E08A1D' },
   { value: 'piquant', label: 'Piquant', color: '#D4321F' },
-  { value: 'poemes', label: 'Poèmes', color: '#9B5FC0' },
+  { value: 'poemes', label: 'Poèmes et Lettres', color: '#9B5FC0' },
 ];
 
 const TAILLE_MAX = 60 * 1024 * 1024; // 60 Mo

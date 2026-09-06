@@ -3,7 +3,7 @@ import { urlImagePub } from '@/lib/ads';
 export default function AdBanner({ ads }) {
   if (!ads || ads.length === 0) return null;
   return (
-    <div style={{ margin: '0 6vw 2vw', display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <div style={{ maxWidth: 1280, margin: '0 auto 2vw', padding: '0 6vw', display: 'flex', flexDirection: 'column', gap: 10 }}>
       {ads.map((ad) => {
         const image = urlImagePub(ad.image_path);
         return (

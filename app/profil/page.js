@@ -11,7 +11,7 @@ const LABELS_CATEGORIE = {
   un_chaud: 'Un Chaud',
   piment: 'Piment',
   piquant: 'Piquant',
-  poemes: 'Poèmes',
+  poemes: 'Poèmes et Lettres',
 };
 const LABELS_STATUT = {
   en_attente: { label: 'En attente', bg: '#FBF1DF', color: '#8A6412' },

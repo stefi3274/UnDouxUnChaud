@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const LABELS = { un_doux: 'Un Doux', un_chaud: 'Un Chaud', piment: 'Piment', piquant: 'Piquant', poemes: 'Poèmes' };
+const LABELS = { un_doux: 'Un Doux', un_chaud: 'Un Chaud', piment: 'Piment', piquant: 'Piquant', poemes: 'Poèmes et Lettres' };
 const COULEURS = { un_doux: '#E85D8A', un_chaud: '#3F8F5C', piment: '#E08A1D', piquant: '#D4321F', poemes: '#9B5FC0' };
 
 export default function AudioQueue({ audios }) {

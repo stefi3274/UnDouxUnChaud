@@ -2,8 +2,9 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer style={{
-      borderTop: '1px solid #DDD2BC', marginTop: 40, padding: '28px 6vw',
+    <footer style={{ borderTop: '1px solid #DDD2BC', marginTop: 40 }}>
+    <div style={{
+      padding: '28px 6vw', maxWidth: 1280, margin: '0 auto',
       display: 'flex', flexWrap: 'wrap', gap: '10px 24px', alignItems: 'center',
       justifyContent: 'space-between', fontSize: '0.82rem', color: '#6B6255',
     }}>
@@ -15,6 +16,7 @@ export default function Footer() {
       <div>
         Créé par <span style={{ fontWeight: 700, color: '#2B2620' }}>SteFi Services</span>
       </div>
+    </div>
     </footer>
   );
 }

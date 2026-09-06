@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
+import { verifierLimite } from '@/lib/rateLimit';
 
 async function verifierAcces(conversationId, userId) {
   const { data: conversation } = await supabaseAdmin
@@ -70,6 +71,11 @@ export async function POST(request, { params }) {
   }
   if (contenu.length > 4000) {
     return NextResponse.json({ error: 'Message trop long.' }, { status: 400 });
+  }
+
+  const { autorise } = await verifierLimite(`message:${user.id}`, 30, 5);
+  if (!autorise) {
+    return NextResponse.json({ error: 'Trop de messages envoyés. Ralentis un peu.' }, { status: 429 });
   }
 
   const autreId = conversation.user1_id === user.id ? conversation.user2_id : conversation.user1_id;
