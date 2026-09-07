@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
+import { verifierLimite } from '@/lib/rateLimit';
 
 const TAILLE_MAX = 8 * 1024 * 1024; // 8 Mo
 const TYPES_AUTORISES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -10,6 +11,11 @@ export async function POST(request) {
   const user = getSessionUser();
   if (!user) {
     return NextResponse.json({ error: 'Connecte-toi pour proposer une photo.' }, { status: 401 });
+  }
+
+  const { autorise } = await verifierLimite(`photo-submit:${user.id}`, 15, 60);
+  if (!autorise) {
+    return NextResponse.json({ error: 'Trop de photos envoyées récemment. Réessaie plus tard.' }, { status: 429 });
   }
 
   const formData = await request.formData();

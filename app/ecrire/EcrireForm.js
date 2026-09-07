@@ -9,6 +9,12 @@ const CATEGORIES = [
   { value: 'piment', label: 'Piment', color: '#E08A1D' },
   { value: 'piquant', label: 'Piquant', color: '#D4321F' },
   { value: 'poemes', label: 'Poèmes et Lettres', color: '#9B5FC0' },
+  { value: 'chat_fiction', label: 'Chat Fiction', color: '#C9A227' },
+];
+
+const LANGUES = [
+  { value: 'fr', label: 'FR' },
+  { value: 'ht', label: 'HT' },
 ];
 
 function TagInput({ tags, setTags, placeholder }) {
@@ -51,6 +57,7 @@ export default function EcrireForm() {
   const router = useRouter();
   const [titre, setTitre] = useState('');
   const [categorie, setCategorie] = useState('un_doux');
+  const [langue, setLangue] = useState('fr');
   const [isSeries, setIsSeries] = useState(false);
   const [serieTitre, setSerieTitre] = useState('');
   const [chapitreNum, setChapitreNum] = useState('');
@@ -116,7 +123,7 @@ export default function EcrireForm() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        titre, contenu, categorie,
+        titre, contenu, categorie, langue,
         orientation_hh: orientHH, orientation_ff: orientFF,
         tags, avertissements,
         image_url: imageUrl || null,
@@ -168,6 +175,27 @@ export default function EcrireForm() {
         <div style={{ marginBottom: 20 }}>
           <label style={labelStyle}>Titre</label>
           <input style={inputStyle} value={titre} onChange={(e) => setTitre(e.target.value)} required />
+        </div>
+
+        <div style={{ marginBottom: 20 }}>
+          <label style={labelStyle}>Langue d'écriture</label>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {LANGUES.map((l) => (
+              <button
+                type="button"
+                key={l.value}
+                onClick={() => setLangue(l.value)}
+                style={{
+                  padding: '9px 20px', borderRadius: 100, fontSize: '0.85rem', fontWeight: 700,
+                  border: `1px solid ${langue === l.value ? '#0A5F63' : '#DDD2BC'}`,
+                  background: langue === l.value ? '#0A5F63' : '#fff',
+                  color: langue === l.value ? '#fff' : '#2B2620', cursor: 'pointer',
+                }}
+              >
+                {l.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div style={{ marginBottom: 20 }}>

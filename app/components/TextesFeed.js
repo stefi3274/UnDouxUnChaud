@@ -11,6 +11,7 @@ const CATEGORIES = [
   { value: 'piment', label: 'Piment', color: '#E08A1D' },
   { value: 'piquant', label: 'Piquant', color: '#D4321F' },
   { value: 'poemes', label: 'Poèmes et Lettres', color: '#9B5FC0' },
+  { value: 'chat_fiction', label: 'Chat Fiction', color: '#C9A227' },
 ];
 
 const LABELS_CATEGORIE = {
@@ -19,6 +20,7 @@ const LABELS_CATEGORIE = {
   piment: 'Piment',
   piquant: 'Piquant',
   poemes: 'Poèmes et Lettres',
+  chat_fiction: 'Chat Fiction',
 };
 
 const INTERVALLE_PUB = 6;
@@ -79,8 +81,18 @@ export default function TextesFeed({ textes, hasAccount, ads = [] }) {
               <AdCard ad={ads[(i / INTERVALLE_PUB - 1) % ads.length]} />
             )}
             <Link href={`/textes/${texte.id}`} className={`card card-${texte.categorie}`}>
-              <span className={`badge ${texte.categorie}`}>
-                {LABELS_CATEGORIE[texte.categorie]}
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span className={`badge ${texte.categorie}`}>
+                  {LABELS_CATEGORIE[texte.categorie]}
+                </span>
+                {texte.langue === 'ht' && (
+                  <span style={{
+                    fontSize: '0.68rem', fontWeight: 700, color: '#6B6255', border: '1px solid #DDD2BC',
+                    borderRadius: 100, padding: '2px 8px',
+                  }}>
+                    HT
+                  </span>
+                )}
               </span>
               <h3 style={{ marginTop: 10 }}>{texte.titre}</h3>
               <p className="card-excerpt">{extrait(texte.contenu)}</p>

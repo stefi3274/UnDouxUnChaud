@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
+import { verifierLimite } from '@/lib/rateLimit';
 
-const CATEGORIES_VALIDES = ['un_doux', 'un_chaud', 'piment', 'piquant', 'poemes'];
+const CATEGORIES_VALIDES = ['un_doux', 'un_chaud', 'piment', 'piquant', 'poemes', 'chat_fiction'];
+const LANGUES_VALIDES = ['fr', 'ht'];
 
 export async function POST(request) {
   const user = getSessionUser();
@@ -10,9 +12,14 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 });
   }
 
+  const { autorise } = await verifierLimite(`texte-submit:${user.id}`, 10, 60);
+  if (!autorise) {
+    return NextResponse.json({ error: 'Trop de textes soumis récemment. Réessaie plus tard.' }, { status: 429 });
+  }
+
   const body = await request.json();
   const {
-    titre, contenu, categorie,
+    titre, contenu, categorie, langue,
     orientation_hh, orientation_ff,
     tags, avertissements,
     image_url, image_credit, serie_titre, chapitre_numero,
@@ -21,6 +28,15 @@ export async function POST(request) {
 
   if (!titre || !contenu || !categorie) {
     return NextResponse.json({ error: 'Titre, texte et catégorie sont requis.' }, { status: 400 });
+  }
+  if (titre.trim().length > 150) {
+    return NextResponse.json({ error: 'Le titre est trop long (150 caractères maximum).' }, { status: 400 });
+  }
+  if (contenu.trim().length > 50000) {
+    return NextResponse.json({ error: 'Le texte est trop long (50 000 caractères maximum).' }, { status: 400 });
+  }
+  if (!LANGUES_VALIDES.includes(langue)) {
+    return NextResponse.json({ error: 'Langue invalide.' }, { status: 400 });
   }
   const wordCount = contenu.trim().split(/\s+/).filter(Boolean).length;
   if (categorie === 'poemes' && wordCount < 100) {
@@ -40,6 +56,7 @@ export async function POST(request) {
       titre,
       contenu,
       categorie,
+      langue,
       orientation_hh: !!orientation_hh,
       orientation_ff: !!orientation_ff,
       tags: tags || [],

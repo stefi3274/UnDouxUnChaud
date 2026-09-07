@@ -8,6 +8,7 @@ const CATEGORIES = {
   piment: { label: 'Piment', color: '#E08A1D' },
   piquant: { label: 'Piquant', color: '#D4321F' },
   poemes: { label: 'Poèmes et Lettres', color: '#9B5FC0' },
+  chat_fiction: { label: 'Chat Fiction', color: '#C9A227' },
 };
 
 const SIZE = 1080;
@@ -125,6 +126,7 @@ function extraitParDefaut(contenu) {
 
 export default function PostGenerator({ textes }) {
   const canvasRef = useRef(null);
+  const [mode, setMode] = useState('texte'); // 'texte' | 'libre'
   const [texteId, setTexteId] = useState('');
   const [extrait, setExtrait] = useState('');
   const [auteur, setAuteur] = useState('');
@@ -137,6 +139,16 @@ export default function PostGenerator({ textes }) {
   const [afficherTexteComplet, setAfficherTexteComplet] = useState(false);
 
   const texteSelectionne = textes.find((x) => String(x.id) === String(texteId));
+
+  function choisirMode(nouveauMode) {
+    setMode(nouveauMode);
+    setTexteId('');
+    setExtrait(nouveauMode === 'libre' ? "Envie d'écrire ? Rejoins la communauté et partage ton texte." : '');
+    setAuteur('');
+    setImageUrl(null);
+    setLgbt(false);
+    setAfficherTexteComplet(false);
+  }
 
   async function choisirTexte(id) {
     setAfficherTexteComplet(false);
@@ -267,7 +279,7 @@ export default function PostGenerator({ textes }) {
       ctx.font = '600 13px "Public Sans", sans-serif';
       ctx.fillStyle = 'rgba(255,255,255,0.78)';
       ctx.textBaseline = 'alphabetic';
-      fillTextSpaced(ctx, 'LIRE LE TEXTE COMPLET', MARGE, sepY + 34, 2.4, 'left');
+      fillTextSpaced(ctx, mode === 'libre' ? 'ENVOIE TON TEXTE' : 'LIRE LE TEXTE COMPLET', MARGE, sepY + 34, 2.4, 'left');
 
       ctx.fillStyle = cat.color;
       fillTextSpaced(ctx, 'UNDOUXUNCHAUD.COM →', SIZE - MARGE, sepY + 34, 2.4, 'right');
@@ -276,7 +288,7 @@ export default function PostGenerator({ textes }) {
     }
     dessiner();
     return () => { annule = true; };
-  }, [extrait, auteur, categorie, imageUrl, lgbt]);
+  }, [extrait, auteur, categorie, imageUrl, lgbt, mode]);
 
   function telecharger() {
     const canvas = canvasRef.current;
@@ -305,6 +317,34 @@ export default function PostGenerator({ textes }) {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 1fr) 380px', gap: 32, alignItems: 'start' }}>
       <div>
+        <div style={{ marginBottom: 24, display: 'flex', gap: 8 }}>
+          <button
+            type="button"
+            onClick={() => choisirMode('texte')}
+            style={{
+              flex: 1, padding: '11px 16px', borderRadius: 100, fontSize: '0.86rem', fontWeight: 700, cursor: 'pointer',
+              border: `1.5px solid ${mode === 'texte' ? '#2B2620' : '#DDD2BC'}`,
+              background: mode === 'texte' ? '#2B2620' : '#fff',
+              color: mode === 'texte' ? '#fff' : '#2B2620',
+            }}
+          >
+            À partir d'un texte
+          </button>
+          <button
+            type="button"
+            onClick={() => choisirMode('libre')}
+            style={{
+              flex: 1, padding: '11px 16px', borderRadius: 100, fontSize: '0.86rem', fontWeight: 700, cursor: 'pointer',
+              border: `1.5px solid ${mode === 'libre' ? '#2B2620' : '#DDD2BC'}`,
+              background: mode === 'libre' ? '#2B2620' : '#fff',
+              color: mode === 'libre' ? '#fff' : '#2B2620',
+            }}
+          >
+            ✨ Post libre (invitation)
+          </button>
+        </div>
+
+        {mode === 'texte' && (
         <div style={{ marginBottom: 20 }}>
           <label style={labelStyle}>Texte publié</label>
           <select value={texteId} onChange={(e) => choisirTexte(e.target.value)} style={inputStyle}>
@@ -331,16 +371,17 @@ export default function PostGenerator({ textes }) {
             </p>
           )}
         </div>
+        )}
 
         <div style={{ marginBottom: 20 }}>
-          <label style={labelStyle}>Extrait affiché sur le visuel</label>
+          <label style={labelStyle}>{mode === 'libre' ? 'Message d\'invitation' : 'Extrait affiché sur le visuel'}</label>
           <textarea
             value={extrait}
             onChange={(e) => setExtrait(e.target.value)}
             style={{ ...inputStyle, minHeight: 120, resize: 'vertical', lineHeight: 1.5 }}
-            placeholder="Colle ou ajuste l'extrait à mettre en avant..."
+            placeholder={mode === 'libre' ? "Ex. : Envie d'écrire ? Ton texte a sa place ici..." : "Colle ou ajuste l'extrait à mettre en avant..."}
           />
-          {texteSelectionne && (
+          {mode === 'texte' && texteSelectionne && (
             <>
               <button
                 type="button"
@@ -367,12 +408,12 @@ export default function PostGenerator({ textes }) {
         </div>
 
         <div style={{ marginBottom: 20 }}>
-          <label style={labelStyle}>Auteur·rice (pseudo)</label>
+          <label style={labelStyle}>{mode === 'libre' ? 'Signature (optionnelle)' : 'Auteur·rice (pseudo)'}</label>
           <input
             value={auteur}
             onChange={(e) => setAuteur(e.target.value)}
             style={inputStyle}
-            placeholder="pseudo"
+            placeholder={mode === 'libre' ? 'ex. : L\'équipe UnDouxUnChaud' : 'pseudo'}
           />
         </div>
 
@@ -397,10 +438,12 @@ export default function PostGenerator({ textes }) {
           </div>
         </div>
 
+        {mode === 'texte' && (
         <label style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24, cursor: 'pointer', fontSize: '0.88rem', fontWeight: 600 }}>
           <input type="checkbox" checked={lgbt} onChange={(e) => setLgbt(e.target.checked)} />
           🏳️‍🌈 Contenu Gay/Lesbien (affiche le drapeau arc-en-ciel)
         </label>
+        )}
 
         {erreurExport && (
           <p style={{ background: '#FBE7E4', color: '#B23A2E', padding: '10px 14px', borderRadius: 10, marginBottom: 14, fontSize: '0.85rem' }}>

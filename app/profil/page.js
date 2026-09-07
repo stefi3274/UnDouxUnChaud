@@ -12,6 +12,7 @@ const LABELS_CATEGORIE = {
   piment: 'Piment',
   piquant: 'Piquant',
   poemes: 'Poèmes et Lettres',
+  chat_fiction: 'Chat Fiction',
 };
 const LABELS_STATUT = {
   en_attente: { label: 'En attente', bg: '#FBF1DF', color: '#8A6412' },

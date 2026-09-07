@@ -11,6 +11,7 @@
   --piment: #E08A1D;
   --piquant: #D4321F;
   --poemes: #9B5FC0;
+  --chat-fiction: #C9A227;
 }
 
 * {
@@ -82,6 +83,7 @@ button {
 .badge.piment { background: var(--piment); }
 .badge.piquant { background: var(--piquant); }
 .badge.poemes { background: var(--poemes); }
+.badge.chat_fiction { background: var(--chat-fiction); }
 
 /* Cartes */
 .card {
@@ -104,6 +106,7 @@ button {
 .card-piment { border-left-color: var(--piment); }
 .card-piquant { border-left-color: var(--piquant); }
 .card-poemes { border-left-color: var(--poemes); }
+.card-chat_fiction { border-left-color: var(--chat-fiction); }
 
 /* Boutons */
 .btn-primary {

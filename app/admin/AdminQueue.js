@@ -10,6 +10,7 @@ const LABELS_CATEGORIE = {
   piment: 'Piment',
   piquant: 'Piquant',
   poemes: 'Poèmes et Lettres',
+  chat_fiction: 'Chat Fiction',
 };
 const COULEURS_CATEGORIE = {
   un_doux: '#E85D8A',
@@ -17,6 +18,7 @@ const COULEURS_CATEGORIE = {
   piment: '#E08A1D',
   piquant: '#D4321F',
   poemes: '#9B5FC0',
+  chat_fiction: '#C9A227',
 };
 
 function urgence(dateSoumission) {
@@ -98,6 +100,11 @@ export default function AdminQueue({ textes }) {
                   <span style={{ background: u.bg, color: u.color, fontSize: '0.72rem', fontWeight: 700, padding: '4px 12px', borderRadius: 100 }}>
                     {u.label}
                   </span>
+                  {t.langue === 'ht' && (
+                    <span style={{ border: '1px solid #DDD2BC', color: '#6B6255', fontSize: '0.7rem', fontWeight: 700, padding: '3px 10px', borderRadius: 100 }}>
+                      HT
+                    </span>
+                  )}
                 </div>
                 <h3 style={{ fontFamily: 'Fraunces, serif', marginTop: 10, fontSize: '1.1rem' }}>{t.titre}</h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.82rem', color: '#6B6255', marginTop: 6 }}>

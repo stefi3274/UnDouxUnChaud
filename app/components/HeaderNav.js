@@ -75,6 +75,9 @@ export default function HeaderNav({ user }) {
             padding: '10px 16px', minWidth: 220, display: 'flex', flexDirection: 'column',
             zIndex: 50,
           }}>
+            {pathname !== '/creole' && (
+              <Link href="/creole" style={lienStyle}><span aria-hidden="true">HT</span> Kreyòl</Link>
+            )}
             {pathname !== '/galerie' && (
               <Link href="/galerie" style={lienStyle}><span aria-hidden="true">📸</span> Galerie</Link>
             )}

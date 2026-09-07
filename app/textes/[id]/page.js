@@ -15,6 +15,7 @@ const COULEURS_CATEGORIE = {
   piment: '#E08A1D',
   piquant: '#D4321F',
   poemes: '#9B5FC0',
+  chat_fiction: '#C9A227',
 };
 import { urlAvatar } from '@/lib/avatar';
 
@@ -24,6 +25,7 @@ const LABELS_CATEGORIE = {
   piment: 'Piment',
   piquant: 'Piquant',
   poemes: 'Poèmes et Lettres',
+  chat_fiction: 'Chat Fiction',
 };
 
 async function getTexte(id) {
@@ -97,6 +99,14 @@ export default async function TextePage({ params }) {
         <span className={`badge ${texte.categorie}`}>
           {LABELS_CATEGORIE[texte.categorie]}
         </span>
+        {texte.langue === 'ht' && (
+          <span style={{
+            fontSize: '0.72rem', fontWeight: 700, color: '#6B6255', border: '1px solid #DDD2BC',
+            borderRadius: 100, padding: '3px 10px', marginLeft: 8,
+          }}>
+            HT
+          </span>
+        )}
         <h1 style={{ fontFamily: 'Fraunces, serif', marginTop: 10 }}>{texte.titre}</h1>
         <div style={{ color: '#6B6255', fontSize: '0.88rem', marginTop: 10, display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
           {(() => {

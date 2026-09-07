@@ -6,6 +6,7 @@ const COULEURS_CATEGORIE = {
   piment: '#E08A1D',
   piquant: '#D4321F',
   poemes: '#9B5FC0',
+  chat_fiction: '#C9A227',
 };
 
 export default function VignettesRow({ titre, icone, textes }) {

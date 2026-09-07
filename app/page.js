@@ -7,20 +7,12 @@ import AdBanner from '@/app/components/AdBanner';
 import VignettesRow from '@/app/components/VignettesRow';
 import SplashScreen from '@/app/components/SplashScreen';
 
-const COULEURS_CATEGORIE = {
-  un_doux: '#E85D8A',
-  un_chaud: '#3F8F5C',
-  piment: '#E08A1D',
-  piquant: '#D4321F',
-  poemes: '#9B5FC0',
-};
-
 // Server Component : cette fonction tourne côté serveur à chaque
 // chargement de page, avant l'envoi du HTML au navigateur.
 async function getTextesAcceptes() {
   const { data, error } = await supabasePublic
     .from('udc_textes')
-    .select('id, titre, contenu, categorie, date_publication, user_id, vues, udc_users(pseudo)')
+    .select('id, titre, contenu, categorie, langue, date_publication, user_id, vues, udc_users(pseudo)')
     .eq('statut', 'accepte')
     .order('date_publication', { ascending: false })
     .limit(30);
