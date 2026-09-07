@@ -35,17 +35,46 @@ export async function GET(request, { params }) {
 
   const { data: messages } = await supabaseAdmin
     .from('udc_messages')
-    .select('id, sender_id, contenu, image_path, created_at, lu')
+    .select('id, sender_id, contenu, image_path, created_at, modifie_le, supprime, lu, repond_a')
     .eq('conversation_id', params.id)
     .order('created_at', { ascending: true });
 
+  const idsReponses = [...new Set((messages || []).map((m) => m.repond_a).filter(Boolean))];
+  let messagesOriginauxParId = {};
+  if (idsReponses.length > 0) {
+    const { data: originaux } = await supabaseAdmin
+      .from('udc_messages')
+      .select('id, contenu, sender_id, image_path, supprime')
+      .in('id', idsReponses);
+    messagesOriginauxParId = Object.fromEntries((originaux || []).map((o) => [o.id, o]));
+  }
+
+  const idsMessages = (messages || []).map((m) => m.id);
+  const { data: reactions } = idsMessages.length > 0
+    ? await supabaseAdmin.from('udc_message_reactions').select('message_id, user_id, emoji').in('message_id', idsMessages)
+    : { data: [] };
+
   const messagesAvecImages = await Promise.all(
     (messages || []).map(async (m) => {
-      if (!m.image_path) return { ...m, imageUrl: null };
-      const { data: signed } = await supabaseAdmin.storage
-        .from('messages-images')
-        .createSignedUrl(m.image_path, 3600);
-      return { ...m, imageUrl: signed?.signedUrl || null };
+      const imageUrl = m.image_path
+        ? (await supabaseAdmin.storage.from('messages-images').createSignedUrl(m.image_path, 3600)).data?.signedUrl || null
+        : null;
+
+      const reactionsDuMessage = (reactions || []).filter((r) => r.message_id === m.id);
+      const compteParEmoji = {};
+      let maReaction = null;
+      for (const r of reactionsDuMessage) {
+        compteParEmoji[r.emoji] = (compteParEmoji[r.emoji] || 0) + 1;
+        if (r.user_id === user.id) maReaction = r.emoji;
+      }
+
+      return {
+        ...m,
+        imageUrl,
+        messageOriginal: m.repond_a ? messagesOriginauxParId[m.repond_a] || null : null,
+        reactions: Object.entries(compteParEmoji).map(([emoji, total]) => ({ emoji, total })),
+        maReaction,
+      };
     })
   );
 
@@ -75,7 +104,7 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: 'Conversation introuvable.' }, { status: 404 });
   }
 
-  const { contenu } = await request.json();
+  const { contenu, repond_a } = await request.json();
   if (!contenu?.trim()) {
     return NextResponse.json({ error: 'Message vide.' }, { status: 400 });
   }
@@ -83,31 +112,78 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: 'Message trop long.' }, { status: 400 });
   }
 
-  const { autorise } = await verifierLimite(`message:${user.id}`, 30, 5);
+  const autreId = conversation.user1_id === user.id ? conversation.user2_id : conversation.user1_id;
+
+  const [{ autorise }, { data: blocage }] = await Promise.all([
+    verifierLimite(`message:${user.id}`, 30, 5),
+    supabaseAdmin
+      .from('udc_blocks')
+      .select('id')
+      .or(`and(blocker_id.eq.${user.id},blocked_id.eq.${autreId}),and(blocker_id.eq.${autreId},blocked_id.eq.${user.id})`)
+      .maybeSingle(),
+  ]);
+
   if (!autorise) {
     return NextResponse.json({ error: 'Trop de messages envoyés. Ralentis un peu.' }, { status: 429 });
   }
-
-  const autreId = conversation.user1_id === user.id ? conversation.user2_id : conversation.user1_id;
-  const { data: blocage } = await supabaseAdmin
-    .from('udc_blocks')
-    .select('id')
-    .or(`and(blocker_id.eq.${user.id},blocked_id.eq.${autreId}),and(blocker_id.eq.${autreId},blocked_id.eq.${user.id})`)
-    .maybeSingle();
-
   if (blocage) {
     return NextResponse.json({ error: 'Conversation bloquée.' }, { status: 403 });
   }
 
+  let repondAValide = null;
+  if (repond_a) {
+    const { data: original } = await supabaseAdmin
+      .from('udc_messages')
+      .select('id')
+      .eq('id', repond_a)
+      .eq('conversation_id', params.id)
+      .maybeSingle();
+    if (original) repondAValide = original.id;
+  }
+
   const { data: message, error } = await supabaseAdmin
     .from('udc_messages')
-    .insert({ conversation_id: params.id, sender_id: user.id, contenu: contenu.trim() })
-    .select('id, sender_id, contenu, created_at, lu')
+    .insert({ conversation_id: params.id, sender_id: user.id, contenu: contenu.trim(), repond_a: repondAValide })
+    .select('id, sender_id, contenu, created_at, lu, repond_a')
     .single();
 
   if (error) {
     return NextResponse.json({ error: "Erreur lors de l'envoi." }, { status: 500 });
   }
 
-  return NextResponse.json({ message });
+  let messageOriginal = null;
+  if (repondAValide) {
+    const { data: original } = await supabaseAdmin
+      .from('udc_messages')
+      .select('id, contenu, sender_id, image_path, supprime')
+      .eq('id', repondAValide)
+      .maybeSingle();
+    messageOriginal = original || null;
+  }
+
+  return NextResponse.json({ message: { ...message, imageUrl: null, messageOriginal, reactions: [], maReaction: null } });
+}
+
+export async function DELETE(request, { params }) {
+  const user = getSessionUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Non connecté.' }, { status: 401 });
+  }
+
+  const conversation = await verifierAcces(params.id, user.id);
+  if (!conversation) {
+    return NextResponse.json({ error: 'Conversation introuvable.' }, { status: 404 });
+  }
+
+  const { error } = await supabaseAdmin
+    .from('udc_conversation_hidden')
+    .upsert(
+      { user_id: user.id, conversation_id: params.id, hidden_le: new Date().toISOString() },
+      { onConflict: 'user_id,conversation_id' }
+    );
+
+  if (error) {
+    return NextResponse.json({ error: 'Erreur lors de la suppression.' }, { status: 500 });
+  }
+  return NextResponse.json({ ok: true });
 }

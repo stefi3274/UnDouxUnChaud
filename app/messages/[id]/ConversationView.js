@@ -15,19 +15,23 @@ export default function ConversationView({ conversationId, moi }) {
   const [messages, setMessages] = useState([]);
   const [texte, setTexte] = useState('');
   const [chargement, setChargement] = useState(true);
-  const [envoi, setEnvoi] = useState(false);
+  const [envoiImage, setEnvoiImage] = useState(false);
   const [erreur, setErreur] = useState('');
   const [menuOuvert, setMenuOuvert] = useState(false);
   const [modaleSignal, setModaleSignal] = useState(false);
   const [raisonSignal, setRaisonSignal] = useState('');
   const [modaleCreerPin, setModaleCreerPin] = useState(false);
+  const [messageEnEditionId, setMessageEnEditionId] = useState(null);
+  const [texteEdition, setTexteEdition] = useState('');
+  const [messageMenuOuvertId, setMessageMenuOuvertId] = useState(null);
+  const [repondA, setRepondA] = useState(null);
+  const [reactionsOuvertesId, setReactionsOuvertesId] = useState(null);
   const [typeCreation, setTypeCreation] = useState('pin');
   const [nouveauPin, setNouveauPin] = useState('');
   const [erreurCreerPin, setErreurCreerPin] = useState('');
   const finDeFil = useRef(null);
   const inputRef = useRef(null);
   const fichierRef = useRef(null);
-  const [envoiImage, setEnvoiImage] = useState(false);
 
   async function chargerMeta() {
     const res = await fetch(`/api/messages/${conversationId}/meta`);
@@ -44,7 +48,10 @@ export default function ConversationView({ conversationId, moi }) {
     const res = await fetch(`/api/messages/${conversationId}`);
     if (!res.ok) { setErreur('Conversation introuvable.'); setChargement(false); return; }
     const data = await res.json();
-    setMessages(data.messages || []);
+    setMessages((prev) => {
+      const enAttente = prev.filter((m) => m.id?.toString().startsWith('temp-'));
+      return [...(data.messages || []), ...enAttente];
+    });
     setChargement(false);
   }
 
@@ -114,21 +121,56 @@ export default function ConversationView({ conversationId, moi }) {
     }
   }
 
+  function commencerReponse(m) {
+    setRepondA(m);
+    setMessageMenuOuvertId(null);
+    inputRef.current?.focus();
+  }
+
+  async function reagir(messageId, emoji) {
+    setReactionsOuvertesId(null);
+    // Mise à jour optimiste simple : on relance juste un chargement silencieux après coup.
+    try {
+      await fetch(`/api/messages/${conversationId}/${messageId}/reaction`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emoji }),
+      });
+      chargerMessages(true);
+    } catch {
+      // silencieux : une réaction manquée n'est pas critique
+    }
+  }
+
   async function envoyer(e) {
     e.preventDefault();
-    if (!texte.trim()) return;
-    setEnvoi(true);
-    setErreur('');
-    const res = await fetch(`/api/messages/${conversationId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contenu: texte }),
-    });
-    const data = await res.json();
-    setEnvoi(false);
-    if (!res.ok) { setErreur(data.error || "Erreur lors de l'envoi."); return; }
+    const contenuEnvoye = texte.trim();
+    if (!contenuEnvoye) return;
+
+    const repondAEnvoye = repondA;
+    const tempId = `temp-${Date.now()}`;
+    setMessages((prev) => [...prev, {
+      id: tempId, sender_id: moi.id, contenu: contenuEnvoye, image_path: null,
+      created_at: new Date().toISOString(), modifie_le: null, supprime: false, lu: false,
+      enAttente: true, messageOriginal: repondAEnvoye, reactions: [], maReaction: null,
+    }]);
     setTexte('');
-    setMessages((prev) => [...prev, data.message]);
+    setRepondA(null);
+    setErreur('');
+
+    try {
+      const res = await fetch(`/api/messages/${conversationId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contenu: contenuEnvoye, repond_a: repondAEnvoye?.id || null }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erreur lors de l'envoi.");
+      setMessages((prev) => prev.map((m) => (m.id === tempId ? data.message : m)));
+    } catch (err) {
+      setErreur(err.message || "Erreur lors de l'envoi.");
+      setMessages((prev) => prev.map((m) => (m.id === tempId ? { ...m, enAttente: false, echoue: true } : m)));
+    }
   }
 
   async function bloquer() {
@@ -154,6 +196,48 @@ export default function ConversationView({ conversationId, moi }) {
     setRaisonSignal('');
     setMenuOuvert(false);
     alert("Signalement envoyé, l'équipe va l'examiner.");
+  }
+
+  function commencerEdition(m) {
+    setMessageEnEditionId(m.id);
+    setTexteEdition(m.contenu || '');
+  }
+
+  async function confirmerEdition(id) {
+    const nouveauContenu = texteEdition.trim();
+    if (!nouveauContenu) return;
+    setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, contenu: nouveauContenu, modifie_le: new Date().toISOString() } : m)));
+    setMessageEnEditionId(null);
+    try {
+      const res = await fetch(`/api/messages/${conversationId}/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contenu: nouveauContenu }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || 'Erreur lors de la modification.');
+      }
+    } catch {
+      alert('Erreur lors de la modification.');
+    }
+  }
+
+  async function supprimerMessage(id) {
+    if (!confirm('Supprimer ce message ?')) return;
+    setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, supprime: true, contenu: null, image_path: null } : m)));
+    try {
+      await fetch(`/api/messages/${conversationId}/${id}`, { method: 'DELETE' });
+    } catch {
+      // le message reste marqué supprimé côté affichage même si la requête échoue en tâche de fond
+    }
+  }
+
+  async function supprimerConversation() {
+    setMenuOuvert(false);
+    if (!confirm('Supprimer cette conversation ? Elle disparaîtra de ta liste (elle reviendra si de nouveaux messages arrivent).')) return;
+    await fetch(`/api/messages/${conversationId}`, { method: 'DELETE' });
+    window.location.href = '/messages';
   }
 
   async function basculerVerrou() {
@@ -212,7 +296,9 @@ export default function ConversationView({ conversationId, moi }) {
     const lignes = messages.map((m) => {
       const auteur = m.sender_id === moi.id ? moi.pseudo : meta.autreUtilisateur.pseudo;
       const date = new Date(m.created_at).toLocaleString('fr-FR');
-      const contenu = m.image_path ? `[image]${m.contenu ? ' ' + m.contenu : ''}` : m.contenu;
+      const contenu = m.supprime
+        ? '[message supprimé]'
+        : m.image_path ? `[image]${m.contenu ? ' ' + m.contenu : ''}` : m.contenu;
       return `[${date}] @${auteur} : ${contenu}`;
     });
     const transcript = `Conversation avec @${meta.autreUtilisateur.pseudo} — UnDouxUnChaud\nExportée le ${new Date().toLocaleString('fr-FR')}\n\n${lignes.join('\n')}`;
@@ -317,6 +403,9 @@ export default function ConversationView({ conversationId, moi }) {
               <button type="button" onClick={bloquer} style={{ ...itemMenuStyle, color: '#B23A2E' }}>
                 🚫 Bloquer
               </button>
+              <button type="button" onClick={supprimerConversation} style={{ ...itemMenuStyle, color: '#B23A2E' }}>
+                🗑️ Supprimer la conversation
+              </button>
             </div>
           )}
         </div>
@@ -330,33 +419,162 @@ export default function ConversationView({ conversationId, moi }) {
         )}
         {messages.map((m) => {
           const estMoi = m.sender_id === moi.id;
+          const enEdition = messageEnEditionId === m.id;
+
+          if (m.supprime) {
+            return (
+              <div key={m.id} style={{ display: 'flex', justifyContent: estMoi ? 'flex-end' : 'flex-start' }}>
+                <div style={{
+                  maxWidth: '75%', padding: '10px 14px', borderRadius: 16,
+                  background: 'transparent', border: '1px dashed #DDD2BC',
+                  color: '#6B6255', fontStyle: 'italic', fontSize: '0.85rem',
+                }}>
+                  Message supprimé
+                </div>
+              </div>
+            );
+          }
+
           return (
-            <div key={m.id} style={{ display: 'flex', justifyContent: estMoi ? 'flex-end' : 'flex-start' }}>
-              <div style={{
-                maxWidth: '75%', padding: m.image_path ? 6 : '10px 14px', borderRadius: 16,
-                background: estMoi ? '#0A5F63' : '#F8F3E8',
-                color: estMoi ? '#fff' : '#2B2620',
-                borderBottomRightRadius: estMoi ? 4 : 16,
-                borderBottomLeftRadius: estMoi ? 16 : 4,
-                fontSize: '0.92rem', lineHeight: 1.4, whiteSpace: 'pre-wrap',
-              }}>
-                {m.image_path && m.imageUrl && (
-                  <img
-                    src={m.imageUrl}
-                    alt=""
-                    style={{ display: 'block', maxWidth: '100%', maxHeight: 320, borderRadius: 12, cursor: 'pointer' }}
-                    onClick={() => window.open(m.imageUrl, '_blank')}
+            <div key={m.id} style={{ display: 'flex', flexDirection: 'column', alignItems: estMoi ? 'flex-end' : 'flex-start', gap: 3 }}>
+              <div style={{ display: 'flex', justifyContent: estMoi ? 'flex-end' : 'flex-start', alignItems: 'flex-end', gap: 6, width: '100%' }}>
+                {!estMoi && (
+                  <MenuMessage
+                    m={m} estMoi={estMoi} enEdition={enEdition}
+                    ouvert={messageMenuOuvertId === m.id}
+                    reactionsOuvertes={reactionsOuvertesId === m.id}
+                    onToggleMenu={() => setMessageMenuOuvertId(messageMenuOuvertId === m.id ? null : m.id)}
+                    onToggleReactions={() => setReactionsOuvertesId(reactionsOuvertesId === m.id ? null : m.id)}
+                    onRepondre={() => commencerReponse(m)}
+                    onReagir={(emoji) => reagir(m.id, emoji)}
                   />
                 )}
-                {m.contenu && (
-                  <div style={{ padding: m.image_path ? '8px 6px 2px' : 0 }}>{m.contenu}</div>
+
+                <div style={{
+                  maxWidth: '75%', padding: m.image_path ? 6 : '10px 14px', borderRadius: 16,
+                  background: estMoi ? '#0A5F63' : '#F8F3E8',
+                  color: estMoi ? '#fff' : '#2B2620',
+                  borderBottomRightRadius: estMoi ? 4 : 16,
+                  borderBottomLeftRadius: estMoi ? 16 : 4,
+                  fontSize: '0.92rem', lineHeight: 1.4, whiteSpace: 'pre-wrap',
+                  opacity: m.enAttente ? 0.6 : 1,
+                }}>
+                  {m.messageOriginal && (
+                    <div style={{
+                      borderLeft: `3px solid ${estMoi ? 'rgba(255,255,255,0.5)' : '#0A5F63'}`,
+                      background: estMoi ? 'rgba(255,255,255,0.12)' : 'rgba(10,95,99,0.08)',
+                      padding: '6px 10px', borderRadius: 8, marginBottom: 6, fontSize: '0.82rem',
+                      opacity: 0.9,
+                    }}>
+                      {m.messageOriginal.supprime
+                        ? <em>Message supprimé</em>
+                        : m.messageOriginal.image_path
+                          ? '📷 Image'
+                          : (m.messageOriginal.contenu || '').slice(0, 100)}
+                    </div>
+                  )}
+
+                  {m.image_path && m.imageUrl && (
+                    <img
+                      src={m.imageUrl}
+                      alt=""
+                      style={{ display: 'block', maxWidth: '100%', maxHeight: 320, borderRadius: 12, cursor: 'pointer' }}
+                      onClick={() => window.open(m.imageUrl, '_blank')}
+                    />
+                  )}
+
+                  {enEdition ? (
+                    <div style={{ minWidth: 200 }}>
+                      <textarea
+                        value={texteEdition}
+                        onChange={(e) => setTexteEdition(e.target.value)}
+                        autoFocus
+                        style={{
+                          width: '100%', minHeight: 60, padding: 8, borderRadius: 8, border: '1px solid rgba(255,255,255,0.4)',
+                          background: 'rgba(255,255,255,0.15)', color: 'inherit', fontSize: '0.9rem', resize: 'vertical',
+                        }}
+                      />
+                      <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+                        <button type="button" onClick={() => confirmerEdition(m.id)} style={{ background: '#fff', color: '#0A5F63', border: 'none', borderRadius: 100, padding: '4px 12px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}>
+                          Enregistrer
+                        </button>
+                        <button type="button" onClick={() => setMessageEnEditionId(null)} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.5)', color: 'inherit', borderRadius: 100, padding: '4px 12px', fontSize: '0.78rem', cursor: 'pointer' }}>
+                          Annuler
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {m.contenu && (
+                        <div style={{ padding: m.image_path ? '8px 6px 2px' : 0 }}>{m.contenu}</div>
+                      )}
+                      {(m.modifie_le || m.enAttente || m.echoue) && (
+                        <div style={{ fontSize: '0.68rem', opacity: 0.7, marginTop: 3, padding: m.image_path ? '0 6px' : 0 }}>
+                          {m.echoue ? "⚠️ échec de l'envoi" : m.enAttente ? 'envoi...' : '(modifié)'}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {estMoi && !enEdition && (
+                  <MenuMessage
+                    m={m} estMoi={estMoi} enEdition={enEdition}
+                    ouvert={messageMenuOuvertId === m.id}
+                    reactionsOuvertes={reactionsOuvertesId === m.id}
+                    onToggleMenu={() => setMessageMenuOuvertId(messageMenuOuvertId === m.id ? null : m.id)}
+                    onToggleReactions={() => setReactionsOuvertesId(reactionsOuvertesId === m.id ? null : m.id)}
+                    onRepondre={() => commencerReponse(m)}
+                    onReagir={(emoji) => reagir(m.id, emoji)}
+                    onModifier={() => { commencerEdition(m); setMessageMenuOuvertId(null); }}
+                    onSupprimer={() => { supprimerMessage(m.id); setMessageMenuOuvertId(null); }}
+                  />
                 )}
               </div>
+
+              {m.reactions?.length > 0 && (
+                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                  {m.reactions.map((r) => (
+                    <button
+                      key={r.emoji}
+                      type="button"
+                      onClick={() => reagir(m.id, r.emoji)}
+                      style={{
+                        background: r.emoji === m.maReaction ? '#E3F1EF' : '#fff',
+                        border: `1px solid ${r.emoji === m.maReaction ? '#0A5F63' : '#DDD2BC'}`,
+                        borderRadius: 100, padding: '1px 8px', fontSize: '0.78rem', cursor: 'pointer',
+                      }}
+                    >
+                      {r.emoji} {r.total}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}
         <div ref={finDeFil} />
       </div>
+
+      {repondA && (
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+          background: '#F8F3E8', border: '1px solid #DDD2BC', borderRadius: 10,
+          padding: '8px 12px', marginTop: 8, fontSize: '0.82rem', color: '#2B2620',
+        }}>
+          <div style={{ overflow: 'hidden' }}>
+            <div style={{ fontWeight: 700, color: '#0A5F63', fontSize: '0.75rem' }}>
+              Réponse à {repondA.sender_id === moi.id ? 'toi-même' : `@${meta?.autreUtilisateur?.pseudo}`}
+            </div>
+            <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {repondA.image_path ? '📷 Image' : repondA.contenu}
+            </div>
+          </div>
+          <button type="button" onClick={() => setRepondA(null)} style={{ background: 'none', border: 'none', color: '#6B6255', cursor: 'pointer', fontSize: '1rem', flexShrink: 0 }}>
+            ✕
+          </button>
+        </div>
+      )}
 
       {erreur && <p style={{ color: '#B23A2E', fontSize: '0.85rem' }}>{erreur}</p>}
 
@@ -386,7 +604,7 @@ export default function ConversationView({ conversationId, moi }) {
             fontSize: '0.9rem', background: '#fff',
           }}
         />
-        <button type="submit" disabled={envoi || !texte.trim()} className="btn-primary" style={{ borderRadius: 100, padding: '11px 20px' }}>
+        <button type="submit" disabled={!texte.trim()} className="btn-primary" style={{ borderRadius: 100, padding: '11px 20px' }}>
           Envoyer
         </button>
       </form>
@@ -493,3 +711,74 @@ const itemMenuStyle = {
   display: 'block', width: '100%', textAlign: 'left', padding: '12px 16px',
   background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.88rem', color: '#2B2620',
 };
+
+const itemMenuStylePetit = {
+  display: 'block', width: '100%', textAlign: 'left', padding: '9px 14px',
+  background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.82rem', color: '#2B2620',
+};
+
+const REACTIONS_RAPIDES = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
+
+function MenuMessage({ m, estMoi, ouvert, reactionsOuvertes, onToggleMenu, onToggleReactions, onRepondre, onReagir, onModifier, onSupprimer }) {
+  return (
+    <div style={{ position: 'relative', display: 'flex', gap: 0, flexShrink: 0 }}>
+      <button
+        type="button"
+        onClick={onToggleReactions}
+        style={{ background: 'none', border: 'none', color: '#6B6255', cursor: 'pointer', fontSize: '0.95rem', padding: 4 }}
+        aria-label="Réagir"
+      >
+        🙂
+      </button>
+      <button
+        type="button"
+        onClick={onToggleMenu}
+        style={{ background: 'none', border: 'none', color: '#6B6255', cursor: 'pointer', fontSize: '0.9rem', padding: 4 }}
+        aria-label="Options du message"
+      >
+        ⋯
+      </button>
+
+      {reactionsOuvertes && (
+        <div style={{
+          position: 'absolute', bottom: '110%', left: estMoi ? 'auto' : 0, right: estMoi ? 0 : 'auto',
+          background: '#fff', border: '1px solid #DDD2BC', borderRadius: 100,
+          boxShadow: '0 6px 16px rgba(0,0,0,0.12)', display: 'flex', gap: 4, padding: '6px 8px', zIndex: 15,
+        }}>
+          {REACTIONS_RAPIDES.map((emoji) => (
+            <button
+              key={emoji}
+              type="button"
+              onClick={() => onReagir(emoji)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.15rem', padding: 2, lineHeight: 1 }}
+            >
+              {emoji}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {ouvert && (
+        <div style={{
+          position: 'absolute', bottom: '110%', left: estMoi ? 'auto' : 0, right: estMoi ? 0 : 'auto',
+          background: '#fff', border: '1px solid #DDD2BC', borderRadius: 10,
+          boxShadow: '0 6px 16px rgba(0,0,0,0.12)', overflow: 'hidden', minWidth: 150, zIndex: 15,
+        }}>
+          <button type="button" onClick={onRepondre} style={itemMenuStylePetit}>
+            ↩️ Répondre
+          </button>
+          {estMoi && !m.image_path && (
+            <button type="button" onClick={onModifier} style={itemMenuStylePetit}>
+              ✏️ Modifier
+            </button>
+          )}
+          {estMoi && (
+            <button type="button" onClick={onSupprimer} style={{ ...itemMenuStylePetit, color: '#B23A2E' }}>
+              🗑️ Supprimer
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

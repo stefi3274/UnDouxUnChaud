@@ -83,5 +83,5 @@ export async function POST(request, { params }) {
 
   const { data: signed } = await supabaseAdmin.storage.from('messages-images').createSignedUrl(chemin, 3600);
 
-  return NextResponse.json({ message: { ...message, imageUrl: signed?.signedUrl || null } });
+  return NextResponse.json({ message: { ...message, imageUrl: signed?.signedUrl || null, messageOriginal: null, reactions: [], maReaction: null } });
 }
