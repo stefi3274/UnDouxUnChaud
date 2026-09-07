@@ -32,7 +32,7 @@ export async function GET() {
 
       const { data: dernierMessage } = await supabaseAdmin
         .from('udc_messages')
-        .select('contenu, created_at, sender_id, lu')
+        .select('contenu, image_path, created_at, sender_id, lu')
         .eq('conversation_id', c.id)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -50,7 +50,9 @@ export async function GET() {
         autreId,
         autrePseudo,
         autreAvatar,
-        dernierMessage: dernierMessage?.contenu || null,
+        dernierMessage: dernierMessage?.image_path
+          ? `📷 Image${dernierMessage.contenu ? ' · ' + dernierMessage.contenu : ''}`
+          : dernierMessage?.contenu || null,
         dernierMessageDate: dernierMessage?.created_at || c.created_at,
         nonLus: nonLus || 0,
         verrouillee: idsVerrouilles.has(c.id),

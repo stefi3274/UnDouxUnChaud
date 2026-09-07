@@ -35,9 +35,19 @@ export async function GET(request, { params }) {
 
   const { data: messages } = await supabaseAdmin
     .from('udc_messages')
-    .select('id, sender_id, contenu, created_at, lu')
+    .select('id, sender_id, contenu, image_path, created_at, lu')
     .eq('conversation_id', params.id)
     .order('created_at', { ascending: true });
+
+  const messagesAvecImages = await Promise.all(
+    (messages || []).map(async (m) => {
+      if (!m.image_path) return { ...m, imageUrl: null };
+      const { data: signed } = await supabaseAdmin.storage
+        .from('messages-images')
+        .createSignedUrl(m.image_path, 3600);
+      return { ...m, imageUrl: signed?.signedUrl || null };
+    })
+  );
 
   // Marque comme lus les messages reçus (pas les nôtres).
   await supabaseAdmin
@@ -48,7 +58,7 @@ export async function GET(request, { params }) {
     .eq('lu', false);
 
   return NextResponse.json({
-    messages: messages || [],
+    messages: messagesAvecImages,
     autreUtilisateur: { id: autreId, pseudo: autreUser?.pseudo },
     moi: user.id,
   });

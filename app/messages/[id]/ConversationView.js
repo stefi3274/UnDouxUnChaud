@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { urlAvatar } from '@/lib/avatar';
 import EmojiPicker from '@/app/components/EmojiPicker';
+import { compresserImage } from '@/lib/compresserImage';
 
 export default function ConversationView({ conversationId, moi }) {
   const [meta, setMeta] = useState(null); // { autreUtilisateur, verrouillee, aPinDefini }
@@ -25,6 +26,8 @@ export default function ConversationView({ conversationId, moi }) {
   const [erreurCreerPin, setErreurCreerPin] = useState('');
   const finDeFil = useRef(null);
   const inputRef = useRef(null);
+  const fichierRef = useRef(null);
+  const [envoiImage, setEnvoiImage] = useState(false);
 
   async function chargerMeta() {
     const res = await fetch(`/api/messages/${conversationId}/meta`);
@@ -85,6 +88,30 @@ export default function ConversationView({ conversationId, moi }) {
       const position = debut + emoji.length;
       input?.setSelectionRange(position, position);
     });
+  }
+
+  async function envoyerImage(e) {
+    const fichier = e.target.files?.[0];
+    e.target.value = '';
+    if (!fichier) return;
+
+    setEnvoiImage(true);
+    setErreur('');
+    try {
+      const compressee = await compresserImage(fichier);
+      const fd = new FormData();
+      fd.append('file', compressee);
+
+      const res = await fetch(`/api/messages/${conversationId}/image`, { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erreur lors de l'envoi.");
+
+      setMessages((prev) => [...prev, data.message]);
+    } catch (err) {
+      setErreur(err.message || "Erreur lors de l'envoi de l'image.");
+    } finally {
+      setEnvoiImage(false);
+    }
   }
 
   async function envoyer(e) {
@@ -185,7 +212,8 @@ export default function ConversationView({ conversationId, moi }) {
     const lignes = messages.map((m) => {
       const auteur = m.sender_id === moi.id ? moi.pseudo : meta.autreUtilisateur.pseudo;
       const date = new Date(m.created_at).toLocaleString('fr-FR');
-      return `[${date}] @${auteur} : ${m.contenu}`;
+      const contenu = m.image_path ? `[image]${m.contenu ? ' ' + m.contenu : ''}` : m.contenu;
+      return `[${date}] @${auteur} : ${contenu}`;
     });
     const transcript = `Conversation avec @${meta.autreUtilisateur.pseudo} — UnDouxUnChaud\nExportée le ${new Date().toLocaleString('fr-FR')}\n\n${lignes.join('\n')}`;
 
@@ -305,14 +333,24 @@ export default function ConversationView({ conversationId, moi }) {
           return (
             <div key={m.id} style={{ display: 'flex', justifyContent: estMoi ? 'flex-end' : 'flex-start' }}>
               <div style={{
-                maxWidth: '75%', padding: '10px 14px', borderRadius: 16,
+                maxWidth: '75%', padding: m.image_path ? 6 : '10px 14px', borderRadius: 16,
                 background: estMoi ? '#0A5F63' : '#F8F3E8',
                 color: estMoi ? '#fff' : '#2B2620',
                 borderBottomRightRadius: estMoi ? 4 : 16,
                 borderBottomLeftRadius: estMoi ? 16 : 4,
                 fontSize: '0.92rem', lineHeight: 1.4, whiteSpace: 'pre-wrap',
               }}>
-                {m.contenu}
+                {m.image_path && m.imageUrl && (
+                  <img
+                    src={m.imageUrl}
+                    alt=""
+                    style={{ display: 'block', maxWidth: '100%', maxHeight: 320, borderRadius: 12, cursor: 'pointer' }}
+                    onClick={() => window.open(m.imageUrl, '_blank')}
+                  />
+                )}
+                {m.contenu && (
+                  <div style={{ padding: m.image_path ? '8px 6px 2px' : 0 }}>{m.contenu}</div>
+                )}
               </div>
             </div>
           );
@@ -323,6 +361,20 @@ export default function ConversationView({ conversationId, moi }) {
       {erreur && <p style={{ color: '#B23A2E', fontSize: '0.85rem' }}>{erreur}</p>}
 
       <form onSubmit={envoyer} style={{ display: 'flex', gap: 10, padding: '14px 0', borderTop: '1px solid #DDD2BC', flexShrink: 0 }}>
+        <input ref={fichierRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={envoyerImage} style={{ display: 'none' }} />
+        <button
+          type="button"
+          onClick={() => fichierRef.current?.click()}
+          disabled={envoiImage}
+          aria-label="Envoyer une image"
+          style={{
+            width: 42, height: 42, borderRadius: '50%', border: '1px solid #DDD2BC',
+            background: '#fff', fontSize: '1.15rem', cursor: 'pointer', flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          {envoiImage ? '⏳' : '📎'}
+        </button>
         <EmojiPicker onSelect={insererEmoji} />
         <input
           ref={inputRef}
