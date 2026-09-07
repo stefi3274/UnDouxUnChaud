@@ -5,12 +5,14 @@ import { createSession } from '@/lib/auth';
 import { verifierLimite, obtenirIp } from '@/lib/rateLimit';
 
 export async function POST(request) {
-  const { pseudo, motdepasse, email } = await request.json();
+  const { pseudo: pseudoBrut, motdepasse: motdepasseBrut, email } = await request.json();
+  const pseudo = pseudoBrut?.trim();
+  const motdepasse = motdepasseBrut?.trim();
 
   if (!pseudo || !motdepasse || !email) {
     return NextResponse.json({ error: 'Pseudo, e-mail et mot de passe sont requis.' }, { status: 400 });
   }
-  if (pseudo.trim().length < 2 || pseudo.trim().length > 30) {
+  if (pseudo.length < 2 || pseudo.length > 30) {
     return NextResponse.json({ error: 'Le pseudo doit faire entre 2 et 30 caractères.' }, { status: 400 });
   }
   const emailNormalise = email.trim().toLowerCase();
@@ -32,7 +34,7 @@ export async function POST(request) {
   const { data: pseudoExistant } = await supabaseAdmin
     .from('udc_users')
     .select('id')
-    .ilike('pseudo', pseudo.trim())
+    .ilike('pseudo', pseudo)
     .maybeSingle();
 
   if (pseudoExistant) {
