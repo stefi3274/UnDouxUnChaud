@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSupabaseNavigateur } from '@/lib/supabaseClient';
+import ChampSerie from '@/app/components/ChampSerie';
 
 const CATEGORIES = [
   { value: 'un_doux', label: 'Un Doux', color: '#E85D8A' },
@@ -30,6 +31,9 @@ export default function PublierAudioForm() {
   const [titre, setTitre] = useState('');
   const [description, setDescription] = useState('');
   const [categorie, setCategorie] = useState('un_doux');
+  const [estSerie, setEstSerie] = useState(false);
+  const [serieTitre, setSerieTitre] = useState('');
+  const [chapitreNum, setChapitreNum] = useState('');
   const [envoi, setEnvoi] = useState(false);
   const [progression, setProgression] = useState('');
   const [erreur, setErreur] = useState('');
@@ -80,7 +84,11 @@ export default function PublierAudioForm() {
       const resSubmit = await fetch('/api/audio/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ titre, description, categorie, audio_path: path, duree_secondes: duree }),
+        body: JSON.stringify({
+          titre, description, categorie, audio_path: path, duree_secondes: duree,
+          serie_titre: estSerie && serieTitre.trim() ? serieTitre.trim() : null,
+          chapitre_numero: estSerie && chapitreNum ? parseInt(chapitreNum, 10) : null,
+        }),
       });
       const dataSubmit = await resSubmit.json();
       if (!resSubmit.ok) throw new Error(dataSubmit.error || "Erreur d'enregistrement.");
@@ -143,6 +151,14 @@ export default function PublierAudioForm() {
           ))}
         </div>
       </div>
+
+      <ChampSerie
+        type="audio"
+        estSerie={estSerie} setEstSerie={setEstSerie}
+        serieTitre={serieTitre} setSerieTitre={setSerieTitre}
+        chapitreNum={chapitreNum} setChapitreNum={setChapitreNum}
+        inputStyle={inputStyle}
+      />
 
       {erreur && (
         <p style={{ background: '#FBE7E4', color: '#B23A2E', padding: '10px 14px', borderRadius: 10, marginBottom: 16, fontSize: '0.85rem' }}>

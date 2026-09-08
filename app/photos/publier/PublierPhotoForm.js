@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import ChampSerie from '@/app/components/ChampSerie';
 
 const CATEGORIES = [
   { value: 'un_doux', label: 'Un Doux', color: '#E85D8A' },
@@ -19,6 +20,9 @@ export default function PublierPhotoForm() {
   const [categorie, setCategorie] = useState('un_doux');
   const [droits, setDroits] = useState(false);
   const [majeur, setMajeur] = useState(false);
+  const [estSerie, setEstSerie] = useState(false);
+  const [serieTitre, setSerieTitre] = useState('');
+  const [chapitreNum, setChapitreNum] = useState('');
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState('');
 
@@ -44,6 +48,10 @@ export default function PublierPhotoForm() {
       fd.append('categorie', categorie);
       fd.append('consentement_droits', 'true');
       fd.append('consentement_majeur', 'true');
+      if (estSerie && serieTitre.trim()) {
+        fd.append('serie_titre', serieTitre.trim());
+        if (chapitreNum) fd.append('chapitre_numero', chapitreNum);
+      }
 
       const res = await fetch('/api/photos/submit', { method: 'POST', body: fd });
       const data = await res.json();
@@ -109,6 +117,14 @@ export default function PublierPhotoForm() {
           ))}
         </div>
       </div>
+
+      <ChampSerie
+        type="photo"
+        estSerie={estSerie} setEstSerie={setEstSerie}
+        serieTitre={serieTitre} setSerieTitre={setSerieTitre}
+        chapitreNum={chapitreNum} setChapitreNum={setChapitreNum}
+        inputStyle={inputStyle}
+      />
 
       <div style={{ background: '#FBF1DF', border: '1px solid #E8D4A8', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
         <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: '0.88rem', cursor: 'pointer', marginBottom: 12 }}>

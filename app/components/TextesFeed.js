@@ -95,6 +95,11 @@ export default function TextesFeed({ textes, hasAccount, ads = [] }) {
                 )}
               </span>
               <h3 style={{ marginTop: 10 }}>{texte.titre}</h3>
+              {texte.serie_titre && (
+                <div style={{ fontSize: '0.76rem', color: '#0A5F63', fontWeight: 700, marginTop: 2 }}>
+                  📚 {texte.serie_titre}{texte.chapitre_numero ? ` — Chap. ${texte.chapitre_numero}` : ''}
+                </div>
+              )}
               <p className="card-excerpt">{extrait(texte.contenu)}</p>
               <div className="card-meta">
                 <span className="author">@{texte.udc_users?.pseudo}</span>

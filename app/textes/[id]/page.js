@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { supabasePublic, supabaseAdmin } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
 import HeaderNav from '@/app/components/HeaderNav';
@@ -55,13 +56,26 @@ async function getLikeCount(texteId) {
   return count || 0;
 }
 
+async function getChapitres(userId, serieTitre) {
+  if (!serieTitre) return [];
+  const { data } = await supabasePublic
+    .from('udc_textes')
+    .select('id, titre, chapitre_numero')
+    .eq('statut', 'accepte')
+    .eq('user_id', userId)
+    .eq('serie_titre', serieTitre)
+    .order('chapitre_numero', { ascending: true });
+  return data || [];
+}
+
 export default async function TextePage({ params }) {
   const texte = await getTexte(params.id);
   if (!texte) notFound();
 
-  const [comments, likeCount] = await Promise.all([
+  const [comments, likeCount, chapitres] = await Promise.all([
     getCommentaires(texte.id),
     getLikeCount(texte.id),
+    getChapitres(texte.user_id, texte.serie_titre),
   ]);
   const user = getSessionUser();
 
@@ -108,6 +122,33 @@ export default async function TextePage({ params }) {
           </span>
         )}
         <h1 style={{ fontFamily: 'Fraunces, serif', marginTop: 10 }}>{texte.titre}</h1>
+
+        {texte.serie_titre && (
+          <div style={{ marginTop: 10, background: '#F8F3E8', border: '1px solid #DDD2BC', borderRadius: 12, padding: '14px 16px' }}>
+            <div style={{ fontWeight: 700, color: '#0A5F63', fontSize: '0.88rem' }}>
+              📚 {texte.serie_titre}{texte.chapitre_numero ? ` — Chapitre ${texte.chapitre_numero}` : ''}
+            </div>
+            {chapitres.length > 1 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
+                {chapitres.map((c) => (
+                  <Link
+                    key={c.id}
+                    href={`/textes/${c.id}`}
+                    style={{
+                      padding: '5px 12px', borderRadius: 100, fontSize: '0.78rem', fontWeight: 600,
+                      textDecoration: 'none',
+                      background: c.id === texte.id ? '#0A5F63' : '#fff',
+                      color: c.id === texte.id ? '#fff' : '#2B2620',
+                      border: '1px solid #DDD2BC',
+                    }}
+                  >
+                    Chap. {c.chapitre_numero ?? '?'}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         <div style={{ color: '#6B6255', fontSize: '0.88rem', marginTop: 10, display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
           {(() => {
             const avatar = urlAvatar(texte.udc_users?.avatar_path);

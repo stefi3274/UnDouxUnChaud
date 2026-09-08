@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import ChampSerie from '@/app/components/ChampSerie';
 
 const CATEGORIES = [
   { value: 'un_doux', label: 'Un Doux', color: '#E85D8A' },
@@ -219,18 +220,13 @@ export default function EcrireForm() {
           </div>
         </div>
 
-        <div style={{ marginBottom: 20 }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.9rem' }}>
-            <input type="checkbox" checked={isSeries} onChange={(e) => setIsSeries(e.target.checked)} />
-            Ce texte fait partie d'une série
-          </label>
-          {isSeries && (
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 12, marginTop: 12 }}>
-              <input style={inputStyle} placeholder="Titre de la série" value={serieTitre} onChange={(e) => setSerieTitre(e.target.value)} />
-              <input style={inputStyle} placeholder="Chapitre n°" value={chapitreNum} onChange={(e) => setChapitreNum(e.target.value)} />
-            </div>
-          )}
-        </div>
+        <ChampSerie
+          type="texte"
+          estSerie={isSeries} setEstSerie={setIsSeries}
+          serieTitre={serieTitre} setSerieTitre={setSerieTitre}
+          chapitreNum={chapitreNum} setChapitreNum={setChapitreNum}
+          inputStyle={inputStyle}
+        />
 
         <div style={{ marginBottom: 20 }}>
           <label style={labelStyle}>Image d'illustration (optionnelle)</label>

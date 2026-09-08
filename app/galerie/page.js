@@ -6,7 +6,7 @@ import GalerieGrid from './GalerieGrid';
 async function getPhotos() {
   const { data } = await supabaseAdmin
     .from('udc_photos')
-    .select('id, titre, description, categorie, image_path, source, date_publication, udc_users(pseudo)')
+    .select('id, titre, description, categorie, image_path, source, date_publication, serie_titre, chapitre_numero, user_id, udc_users(pseudo)')
     .eq('statut', 'accepte')
     .order('date_publication', { ascending: false })
     .limit(60);

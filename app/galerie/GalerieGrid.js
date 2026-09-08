@@ -19,6 +19,13 @@ export default function GalerieGrid({ photos, connecte }) {
 
   const visibles = filtre === 'tout' ? photos : photos.filter((p) => p.categorie === filtre);
 
+  const chapitresDe = (p) => {
+    if (!p?.serie_titre) return [];
+    return photos
+      .filter((x) => x.serie_titre === p.serie_titre && x.user_id === p.user_id)
+      .sort((a, b) => (a.chapitre_numero || 0) - (b.chapitre_numero || 0));
+  };
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
@@ -76,6 +83,14 @@ export default function GalerieGrid({ photos, connecte }) {
             <div style={{
               position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.55), transparent 45%)',
             }} />
+            {p.serie_titre && (
+              <span style={{
+                position: 'absolute', top: 10, right: 10, background: 'rgba(0,0,0,0.5)', color: '#fff',
+                fontSize: '0.68rem', fontWeight: 700, padding: '3px 9px', borderRadius: 100,
+              }}>
+                📚 Chap. {p.chapitre_numero ?? '?'}
+              </span>
+            )}
             {p.titre && (
               <div style={{ position: 'absolute', bottom: 10, left: 12, right: 12, color: '#fff', fontWeight: 700, fontSize: '0.9rem', textAlign: 'left' }}>
                 {p.titre}
@@ -108,6 +123,28 @@ export default function GalerieGrid({ photos, connecte }) {
               {ouverte.description && <p style={{ color: 'rgba(255,255,255,0.75)', marginTop: 6, fontSize: '0.9rem' }}>{ouverte.description}</p>}
               {ouverte.source === 'communaute' && ouverte.udc_users?.pseudo && (
                 <p style={{ color: 'rgba(255,255,255,0.55)', marginTop: 8, fontSize: '0.8rem' }}>Proposée par @{ouverte.udc_users.pseudo}</p>
+              )}
+              {ouverte.serie_titre && (
+                <div style={{ marginTop: 14 }}>
+                  <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.7)', marginBottom: 8 }}>
+                    📚 {ouverte.serie_titre}
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center' }}>
+                    {chapitresDe(ouverte).map((c) => (
+                      <button
+                        key={c.id}
+                        onClick={() => setOuverte(c)}
+                        style={{
+                          padding: '5px 12px', borderRadius: 100, fontSize: '0.76rem', fontWeight: 600, cursor: 'pointer',
+                          background: c.id === ouverte.id ? '#fff' : 'rgba(255,255,255,0.12)',
+                          color: c.id === ouverte.id ? '#181410' : '#fff', border: 'none',
+                        }}
+                      >
+                        Chap. {c.chapitre_numero ?? '?'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
             <button

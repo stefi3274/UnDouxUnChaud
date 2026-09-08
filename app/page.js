@@ -12,7 +12,7 @@ import SplashScreen from '@/app/components/SplashScreen';
 async function getTextesAcceptes() {
   const { data, error } = await supabasePublic
     .from('udc_textes')
-    .select('id, titre, contenu, categorie, langue, date_publication, user_id, vues, udc_users(pseudo)')
+    .select('id, titre, contenu, categorie, langue, date_publication, user_id, vues, serie_titre, chapitre_numero, udc_users(pseudo)')
     .eq('statut', 'accepte')
     .order('date_publication', { ascending: false })
     .limit(30);

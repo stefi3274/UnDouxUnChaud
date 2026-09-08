@@ -6,7 +6,7 @@ import AudioList from './AudioList';
 async function getAudios() {
   const { data } = await supabaseAdmin
     .from('udc_audios')
-    .select('id, titre, description, categorie, audio_path, duree_secondes, vues, date_publication, udc_users(pseudo)')
+    .select('id, titre, description, categorie, audio_path, duree_secondes, vues, date_publication, serie_titre, chapitre_numero, user_id, udc_users(pseudo)')
     .eq('statut', 'accepte')
     .order('date_publication', { ascending: false })
     .limit(60);

@@ -26,6 +26,9 @@ export async function POST(request) {
   const consentementDroits = formData.get('consentement_droits') === 'true';
   const consentementMajeur = formData.get('consentement_majeur') === 'true';
   const publierDirect = formData.get('publier_direct') === 'true' && user.role === 'admin';
+  const serieTitre = formData.get('serie_titre')?.toString().trim() || null;
+  const chapitreNumeroBrut = formData.get('chapitre_numero');
+  const chapitreNumero = serieTitre && chapitreNumeroBrut ? parseInt(chapitreNumeroBrut, 10) : null;
 
   if (!file) {
     return NextResponse.json({ error: 'Aucune image reçue.' }, { status: 400 });
@@ -68,6 +71,8 @@ export async function POST(request) {
     consentement_majeur: consentementMajeur,
     date_decision: publierDirect ? maintenant : null,
     date_publication: publierDirect ? maintenant : null,
+    serie_titre: serieTitre,
+    chapitre_numero: chapitreNumero,
   });
 
   if (insertError) {

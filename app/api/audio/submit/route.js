@@ -16,7 +16,7 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Trop d\'audios envoyés récemment. Réessaie plus tard.' }, { status: 429 });
   }
 
-  const { titre, description, categorie, audio_path, duree_secondes } = await request.json();
+  const { titre, description, categorie, audio_path, duree_secondes, serie_titre, chapitre_numero } = await request.json();
 
   if (!titre?.trim() || !audio_path) {
     return NextResponse.json({ error: 'Titre et fichier audio requis.' }, { status: 400 });
@@ -28,6 +28,9 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Catégorie invalide.' }, { status: 400 });
   }
 
+  const serieTitre = serie_titre?.trim() || null;
+  const chapitreNumero = serieTitre && Number.isFinite(chapitre_numero) ? Math.round(chapitre_numero) : null;
+
   const { error } = await supabaseAdmin.from('udc_audios').insert({
     titre: titre.trim(),
     description: description?.trim() || null,
@@ -36,6 +39,8 @@ export async function POST(request) {
     duree_secondes: Number.isFinite(duree_secondes) ? Math.round(duree_secondes) : null,
     user_id: user.id,
     statut: 'en_attente',
+    serie_titre: serieTitre,
+    chapitre_numero: chapitreNumero,
   });
 
   if (error) {
