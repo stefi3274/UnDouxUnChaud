@@ -175,12 +175,24 @@ export async function DELETE(request, { params }) {
     return NextResponse.json({ error: 'Conversation introuvable.' }, { status: 404 });
   }
 
+  // Suppression définitive : on efface d'abord les images stockées,
+  // puis la conversation elle-même (les messages, verrous et
+  // réactions liés sont supprimés automatiquement en cascade).
+  const { data: messagesAvecImages } = await supabaseAdmin
+    .from('udc_messages')
+    .select('image_path')
+    .eq('conversation_id', params.id)
+    .not('image_path', 'is', null);
+
+  const chemins = (messagesAvecImages || []).map((m) => m.image_path).filter(Boolean);
+  if (chemins.length > 0) {
+    await supabaseAdmin.storage.from('messages-images').remove(chemins);
+  }
+
   const { error } = await supabaseAdmin
-    .from('udc_conversation_hidden')
-    .upsert(
-      { user_id: user.id, conversation_id: params.id, hidden_le: new Date().toISOString() },
-      { onConflict: 'user_id,conversation_id' }
-    );
+    .from('udc_conversations')
+    .delete()
+    .eq('id', params.id);
 
   if (error) {
     return NextResponse.json({ error: 'Erreur lors de la suppression.' }, { status: 500 });

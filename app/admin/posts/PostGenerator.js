@@ -38,13 +38,22 @@ function wrapLines(ctx, text, maxWidth) {
   return lines;
 }
 
-function fitExtrait(ctx, text, maxWidth, maxLines) {
+const NOMS_COULEURS = {
+  un_doux: 'Rose', un_chaud: 'Vert', piment: 'Orange', piquant: 'Rouge', poemes: 'Violet', chat_fiction: 'Or',
+};
+
+const POLICES = {
+  fraunces: { label: 'Fraunces (élégant)', css: (taille) => `italic 500 ${taille}px Fraunces, serif` },
+  public_sans: { label: 'Public Sans (moderne)', css: (taille) => `700 ${taille}px "Public Sans", sans-serif` },
+};
+
+function fitExtrait(ctx, text, maxWidth, maxLines, policeCss) {
   let fontSize = 58;
   const minFontSize = 30;
   let lines = [];
   let lineHeight = 0;
   while (fontSize >= minFontSize) {
-    ctx.font = `italic 500 ${fontSize}px Fraunces, serif`;
+    ctx.font = policeCss(fontSize);
     lines = wrapLines(ctx, text, maxWidth);
     lineHeight = Math.round(fontSize * 1.32);
     if (lines.length <= maxLines) break;
@@ -127,6 +136,7 @@ function extraitParDefaut(contenu) {
 export default function PostGenerator({ textes }) {
   const canvasRef = useRef(null);
   const [mode, setMode] = useState('texte'); // 'texte' | 'libre'
+  const [police, setPolice] = useState('fraunces');
   const [texteId, setTexteId] = useState('');
   const [extrait, setExtrait] = useState('');
   const [auteur, setAuteur] = useState('');
@@ -239,14 +249,28 @@ export default function PostGenerator({ textes }) {
       ctx.fillText('UnDouxUnChaud', SIZE - MARGE, 98);
       ctx.textAlign = 'left';
 
-      // Citation, alignée à gauche, ancrée en bas du bloc
+      // Citation, alignée à gauche, centrée verticalement dans la
+      // zone disponible (entre l'en-tête et le bas de page) — pour
+      // un rendu uniforme quelle que soit la longueur du texte,
+      // sans vide en haut ni tassement en bas.
       const maxWidth = SIZE - MARGE * 2 - 20;
       const texteExtrait = extrait?.trim() ? extrait.trim() : 'Sélectionne un texte pour voir l\u2019extrait ici.';
-      const { fontSize, lines, lineHeight } = fitExtrait(ctx, texteExtrait, maxWidth, 6);
-      ctx.font = `italic 500 ${fontSize}px Fraunces, serif`;
+      const policeChoisie = mode === 'libre' ? POLICES[police] : POLICES.fraunces;
+      const { fontSize, lines, lineHeight } = fitExtrait(ctx, texteExtrait, maxWidth, 6, policeChoisie.css);
+      ctx.font = policeChoisie.css(fontSize);
       ctx.fillStyle = '#FFFFFF';
       ctx.textBaseline = 'alphabetic';
-      const baseAncrage = 610;
+
+      const ZONE_HAUT = 200;
+      const ZONE_BAS = 890;
+      const APRES_TEXTE = 95; // espace réservé pour le trait + la signature
+
+      const hauteurGroupe = lines.length * lineHeight + APRES_TEXTE;
+      const hauteurDisponible = ZONE_BAS - ZONE_HAUT;
+      const hautDuGroupe = ZONE_HAUT + Math.max(0, (hauteurDisponible - hauteurGroupe)) / 2;
+      let baseAncrage = hautDuGroupe + fontSize * 0.85 + (lines.length - 1) * lineHeight;
+      baseAncrage = Math.min(baseAncrage, ZONE_BAS - APRES_TEXTE);
+
       let y = baseAncrage - (lines.length - 1) * lineHeight;
       for (const ligne of lines) {
         ctx.fillText(ligne, MARGE, y);
@@ -288,7 +312,7 @@ export default function PostGenerator({ textes }) {
     }
     dessiner();
     return () => { annule = true; };
-  }, [extrait, auteur, categorie, imageUrl, lgbt, mode]);
+  }, [extrait, auteur, categorie, imageUrl, lgbt, mode, police]);
 
   function telecharger() {
     const canvas = canvasRef.current;
@@ -418,7 +442,7 @@ export default function PostGenerator({ textes }) {
         </div>
 
         <div style={{ marginBottom: 24 }}>
-          <label style={labelStyle}>Catégorie</label>
+          <label style={labelStyle}>{mode === 'libre' ? 'Couleur (celles du site)' : 'Catégorie'}</label>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {Object.entries(CATEGORIES).map(([value, c]) => (
               <button
@@ -432,11 +456,34 @@ export default function PostGenerator({ textes }) {
                   color: categorie === value ? '#fff' : '#2B2620', cursor: 'pointer',
                 }}
               >
-                {c.label}
+                {mode === 'libre' ? NOMS_COULEURS[value] : c.label}
               </button>
             ))}
           </div>
         </div>
+
+        {mode === 'libre' && (
+          <div style={{ marginBottom: 24 }}>
+            <label style={labelStyle}>Police du message</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {Object.entries(POLICES).map(([value, p]) => (
+                <button
+                  type="button"
+                  key={value}
+                  onClick={() => setPolice(value)}
+                  style={{
+                    padding: '9px 16px', borderRadius: 100, fontSize: '0.85rem', fontWeight: 600,
+                    border: `1px solid ${police === value ? '#2B2620' : '#DDD2BC'}`,
+                    background: police === value ? '#2B2620' : '#fff',
+                    color: police === value ? '#fff' : '#2B2620', cursor: 'pointer',
+                  }}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {mode === 'texte' && (
         <label style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24, cursor: 'pointer', fontSize: '0.88rem', fontWeight: 600 }}>

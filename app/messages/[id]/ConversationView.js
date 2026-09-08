@@ -235,7 +235,7 @@ export default function ConversationView({ conversationId, moi }) {
 
   async function supprimerConversation() {
     setMenuOuvert(false);
-    if (!confirm('Supprimer cette conversation ? Elle disparaîtra de ta liste (elle reviendra si de nouveaux messages arrivent).')) return;
+    if (!confirm('Supprimer définitivement cette conversation ? Tous les messages seront effacés pour toi et pour l\'autre personne, sans possibilité de retour en arrière.')) return;
     await fetch(`/api/messages/${conversationId}`, { method: 'DELETE' });
     window.location.href = '/messages';
   }

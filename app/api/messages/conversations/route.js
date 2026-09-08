@@ -24,12 +24,6 @@ export async function GET() {
     .eq('user_id', user.id);
   const idsVerrouilles = new Set((verrous || []).map((v) => v.conversation_id));
 
-  const { data: masquees } = await supabaseAdmin
-    .from('udc_conversation_hidden')
-    .select('conversation_id, hidden_le')
-    .eq('user_id', user.id);
-  const dateMasquageParId = Object.fromEntries((masquees || []).map((m) => [m.conversation_id, m.hidden_le]));
-
   const resultats = await Promise.all(
     (conversations || []).map(async (c) => {
       const autrePseudo = c.user1_id === user.id ? c.udc_users_user2?.pseudo : c.udc_users_user1?.pseudo;
@@ -43,12 +37,6 @@ export async function GET() {
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
-
-      const dateMasquage = dateMasquageParId[c.id];
-      const dateDernierMessage = dernierMessage?.created_at || c.created_at;
-      if (dateMasquage && dateMasquage >= dateDernierMessage) {
-        return null; // supprimée pour cette personne, et aucune nouvelle activité depuis
-      }
 
       const { count: nonLus } = await supabaseAdmin
         .from('udc_messages')
@@ -65,15 +53,14 @@ export async function GET() {
         dernierMessage: dernierMessage?.image_path
           ? `📷 Image${dernierMessage.contenu ? ' · ' + dernierMessage.contenu : ''}`
           : dernierMessage?.contenu || null,
-        dernierMessageDate: dateDernierMessage,
+        dernierMessageDate: dernierMessage?.created_at || c.created_at,
         nonLus: nonLus || 0,
         verrouillee: idsVerrouilles.has(c.id),
       };
     })
   );
 
-  const visibles = resultats.filter(Boolean);
-  visibles.sort((a, b) => new Date(b.dernierMessageDate) - new Date(a.dernierMessageDate));
+  resultats.sort((a, b) => new Date(b.dernierMessageDate) - new Date(a.dernierMessageDate));
 
-  return NextResponse.json({ conversations: visibles });
+  return NextResponse.json({ conversations: resultats });
 }
