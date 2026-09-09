@@ -10,6 +10,7 @@ export default function ConversationView({ conversationId, moi }) {
   const [meta, setMeta] = useState(null); // { autreUtilisateur, verrouillee, aPinDefini }
   const [deverrouille, setDeverrouille] = useState(false);
   const [pinSaisi, setPinSaisi] = useState('');
+  const [afficherPinSaisi, setAfficherPinSaisi] = useState(false);
   const [erreurPin, setErreurPin] = useState('');
 
   const [messages, setMessages] = useState([]);
@@ -28,6 +29,7 @@ export default function ConversationView({ conversationId, moi }) {
   const [reactionsOuvertesId, setReactionsOuvertesId] = useState(null);
   const [typeCreation, setTypeCreation] = useState('pin');
   const [nouveauPin, setNouveauPin] = useState('');
+  const [afficherNouveauPin, setAfficherNouveauPin] = useState(false);
   const [erreurCreerPin, setErreurCreerPin] = useState('');
   const finDeFil = useRef(null);
   const inputRef = useRef(null);
@@ -331,20 +333,33 @@ export default function ConversationView({ conversationId, moi }) {
         <div style={{ fontSize: '2.4rem' }}>🔒</div>
         <h1 style={{ fontFamily: 'Fraunces, serif', fontSize: '1.2rem', marginTop: 10 }}>Conversation verrouillée</h1>
         <form onSubmit={verifierPin} style={{ marginTop: 20 }}>
-          <input
-            type="password"
-            inputMode={meta?.typeVerrou === 'pin' ? 'numeric' : 'text'}
-            maxLength={meta?.typeVerrou === 'pin' ? 4 : undefined}
-            value={pinSaisi}
-            onChange={(e) => setPinSaisi(meta?.typeVerrou === 'pin' ? e.target.value.replace(/\D/g, '') : e.target.value)}
-            autoFocus
-            placeholder={meta?.typeVerrou === 'pin' ? '' : 'Mot de passe'}
-            style={{
-              display: 'block', width: meta?.typeVerrou === 'pin' ? 120 : 220, margin: '0 auto', padding: '10px 12px',
-              fontSize: '1.1rem', letterSpacing: meta?.typeVerrou === 'pin' ? '0.3em' : 'normal',
-              textAlign: 'center', border: '1px solid #DDD2BC', borderRadius: 10,
-            }}
-          />
+          <div style={{ position: 'relative', width: meta?.typeVerrou === 'pin' ? 120 : 220, margin: '0 auto' }}>
+            <input
+              type={afficherPinSaisi ? 'text' : 'password'}
+              inputMode={meta?.typeVerrou === 'pin' ? 'numeric' : 'text'}
+              maxLength={meta?.typeVerrou === 'pin' ? 4 : undefined}
+              value={pinSaisi}
+              onChange={(e) => setPinSaisi(meta?.typeVerrou === 'pin' ? e.target.value.replace(/\D/g, '') : e.target.value)}
+              autoFocus
+              placeholder={meta?.typeVerrou === 'pin' ? '' : 'Mot de passe'}
+              style={{
+                display: 'block', width: '100%', padding: '10px 40px 10px 12px',
+                fontSize: '1.1rem', letterSpacing: meta?.typeVerrou === 'pin' ? '0.3em' : 'normal',
+                textAlign: 'center', border: '1px solid #DDD2BC', borderRadius: 10, boxSizing: 'border-box',
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => setAfficherPinSaisi((v) => !v)}
+              aria-label={afficherPinSaisi ? 'Masquer' : 'Afficher'}
+              style={{
+                position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
+                background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.05rem', padding: 4, lineHeight: 1,
+              }}
+            >
+              {afficherPinSaisi ? '🙈' : '👁️'}
+            </button>
+          </div>
           {erreurPin && <p style={{ color: '#B23A2E', fontSize: '0.8rem', marginTop: 8 }}>{erreurPin}</p>}
           <button type="submit" className="btn-primary" style={{ border: 'none', marginTop: 16 }}>
             Déverrouiller
@@ -675,22 +690,35 @@ export default function ConversationView({ conversationId, moi }) {
               </button>
             </div>
 
-            <input
-              type="password"
-              inputMode={typeCreation === 'pin' ? 'numeric' : 'text'}
-              maxLength={typeCreation === 'pin' ? 4 : undefined}
-              value={nouveauPin}
-              onChange={(e) => setNouveauPin(typeCreation === 'pin' ? e.target.value.replace(/\D/g, '') : e.target.value)}
-              placeholder={typeCreation === 'pin' ? '' : '6 caractères minimum'}
-              autoFocus
-              style={{
-                display: 'block', width: typeCreation === 'pin' ? 120 : '100%', margin: '16px auto 0',
-                padding: '10px 12px', fontSize: typeCreation === 'pin' ? '1.1rem' : '0.95rem',
-                letterSpacing: typeCreation === 'pin' ? '0.3em' : 'normal',
-                textAlign: typeCreation === 'pin' ? 'center' : 'left',
-                border: '1px solid #DDD2BC', borderRadius: 10, boxSizing: 'border-box',
-              }}
-            />
+            <div style={{ position: 'relative', width: typeCreation === 'pin' ? 120 : '100%', margin: '16px auto 0' }}>
+              <input
+                type={afficherNouveauPin ? 'text' : 'password'}
+                inputMode={typeCreation === 'pin' ? 'numeric' : 'text'}
+                maxLength={typeCreation === 'pin' ? 4 : undefined}
+                value={nouveauPin}
+                onChange={(e) => setNouveauPin(typeCreation === 'pin' ? e.target.value.replace(/\D/g, '') : e.target.value)}
+                placeholder={typeCreation === 'pin' ? '' : '6 caractères minimum'}
+                autoFocus
+                style={{
+                  display: 'block', width: '100%',
+                  padding: '10px 40px 10px 12px', fontSize: typeCreation === 'pin' ? '1.1rem' : '0.95rem',
+                  letterSpacing: typeCreation === 'pin' ? '0.3em' : 'normal',
+                  textAlign: typeCreation === 'pin' ? 'center' : 'left',
+                  border: '1px solid #DDD2BC', borderRadius: 10, boxSizing: 'border-box',
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setAfficherNouveauPin((v) => !v)}
+                aria-label={afficherNouveauPin ? 'Masquer' : 'Afficher'}
+                style={{
+                  position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
+                  background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.05rem', padding: 4, lineHeight: 1,
+                }}
+              >
+                {afficherNouveauPin ? '🙈' : '👁️'}
+              </button>
+            </div>
             {erreurCreerPin && <p style={{ color: '#B23A2E', fontSize: '0.8rem', marginTop: 8 }}>{erreurCreerPin}</p>}
             <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
               <button type="button" onClick={() => setModaleCreerPin(false)} className="btn-outline" style={{ flex: 1 }}>

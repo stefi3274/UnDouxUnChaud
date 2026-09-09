@@ -69,6 +69,7 @@ export default function ConversationsList() {
   const [pin, setPin] = useState('');
   const [erreurPin, setErreurPin] = useState('');
   const [typeVerrou, setTypeVerrou] = useState('pin');
+  const [afficherPin, setAfficherPin] = useState(false);
 
   useEffect(() => {
     let annule = false;
@@ -145,21 +146,34 @@ export default function ConversationsList() {
           <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#6B6255' }}>
             {typeVerrou === 'pin' ? 'Code à 4 chiffres' : 'Mot de passe'}
           </label>
-          <input
-            type="password"
-            inputMode={typeVerrou === 'pin' ? 'numeric' : 'text'}
-            maxLength={typeVerrou === 'pin' ? 4 : undefined}
-            value={pin}
-            onChange={(e) => setPin(typeVerrou === 'pin' ? e.target.value.replace(/\D/g, '') : e.target.value)}
-            autoFocus
-            style={{
-              display: 'block', width: typeVerrou === 'pin' ? 120 : '100%', marginTop: 8,
-              padding: '10px 12px', fontSize: typeVerrou === 'pin' ? '1.1rem' : '0.95rem',
-              letterSpacing: typeVerrou === 'pin' ? '0.3em' : 'normal',
-              textAlign: typeVerrou === 'pin' ? 'center' : 'left',
-              border: '1px solid #DDD2BC', borderRadius: 10, boxSizing: 'border-box',
-            }}
-          />
+          <div style={{ position: 'relative', width: typeVerrou === 'pin' ? 120 : '100%', marginTop: 8 }}>
+            <input
+              type={afficherPin ? 'text' : 'password'}
+              inputMode={typeVerrou === 'pin' ? 'numeric' : 'text'}
+              maxLength={typeVerrou === 'pin' ? 4 : undefined}
+              value={pin}
+              onChange={(e) => setPin(typeVerrou === 'pin' ? e.target.value.replace(/\D/g, '') : e.target.value)}
+              autoFocus
+              style={{
+                display: 'block', width: '100%',
+                padding: '10px 40px 10px 12px', fontSize: typeVerrou === 'pin' ? '1.1rem' : '0.95rem',
+                letterSpacing: typeVerrou === 'pin' ? '0.3em' : 'normal',
+                textAlign: typeVerrou === 'pin' ? 'center' : 'left',
+                border: '1px solid #DDD2BC', borderRadius: 10, boxSizing: 'border-box',
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => setAfficherPin((v) => !v)}
+              aria-label={afficherPin ? 'Masquer' : 'Afficher'}
+              style={{
+                position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
+                background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.05rem', padding: 4, lineHeight: 1,
+              }}
+            >
+              {afficherPin ? '🙈' : '👁️'}
+            </button>
+          </div>
           {erreurPin && <p style={{ color: '#B23A2E', fontSize: '0.8rem', marginTop: 6 }}>{erreurPin}</p>}
           <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
             <button type="submit" className="btn-primary" style={{ border: 'none', padding: '9px 18px', fontSize: '0.85rem' }}>
