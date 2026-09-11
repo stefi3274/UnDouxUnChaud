@@ -4,6 +4,7 @@ import { getSessionUser } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import HeaderNav from '@/app/components/HeaderNav';
 import AvatarUpload from './AvatarUpload';
+import BioEditor from './BioEditor';
 import { urlAvatar } from '@/lib/avatar';
 
 const LABELS_CATEGORIE = {
@@ -41,7 +42,7 @@ export default async function ProfilPage() {
 
   const { data: moi } = await supabaseAdmin
     .from('udc_users')
-    .select('avatar_path')
+    .select('avatar_path, bio')
     .eq('id', user.id)
     .maybeSingle();
 
@@ -51,8 +52,15 @@ export default async function ProfilPage() {
       <main style={{ maxWidth: 720, margin: '0 auto', padding: '5vw 6vw 8vw' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
           <AvatarUpload avatarUrl={urlAvatar(moi?.avatar_path)} pseudo={user.pseudo} />
-          <h1 style={{ fontFamily: 'Fraunces, serif' }}>@{user.pseudo}</h1>
+          <div>
+            <h1 style={{ fontFamily: 'Fraunces, serif' }}>@{user.pseudo}</h1>
+            <Link href={`/auteur/${encodeURIComponent(user.pseudo)}`} style={{ fontSize: '0.82rem', color: '#0A5F63', fontWeight: 600 }}>
+              Voir mon profil public →
+            </Link>
+          </div>
         </div>
+
+        <BioEditor bioInitiale={moi?.bio || ''} />
 
         <h2 style={{ fontFamily: 'Fraunces, serif', fontSize: '1.1rem', marginTop: 32, marginBottom: 16 }}>
           Mes textes

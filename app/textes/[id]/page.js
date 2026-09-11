@@ -39,6 +39,24 @@ async function getTexte(id) {
   return data;
 }
 
+export async function generateMetadata({ params }) {
+  const texte = await getTexte(params.id);
+  if (!texte) return {};
+
+  const extrait = texte.contenu.trim().replace(/\s+/g, ' ').slice(0, 160);
+  const titre = `${texte.titre} — ${LABELS_CATEGORIE[texte.categorie] || ''}`;
+
+  return {
+    title: titre,
+    description: extrait,
+    openGraph: {
+      title: titre,
+      description: extrait,
+      images: ['/logo.jpg'],
+    },
+  };
+}
+
 async function getCommentaires(texteId) {
   const { data } = await supabasePublic
     .from('udc_commentaires')
@@ -156,7 +174,9 @@ export default async function TextePage({ params }) {
               <img src={avatar} alt="" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover', marginRight: 8 }} />
             ) : null;
           })()}
-          <span style={{ color: '#0A5F63', fontWeight: 700 }}>@{texte.udc_users?.pseudo}</span>
+          <Link href={`/auteur/${encodeURIComponent(texte.udc_users?.pseudo || '')}`} style={{ color: '#0A5F63', fontWeight: 700, textDecoration: 'none' }}>
+            @{texte.udc_users?.pseudo}
+          </Link>
           {' · '}
           {texte.date_publication ? new Date(texte.date_publication).toLocaleDateString('fr-FR') : ''}
           {' · '}👁️ {texte.vues || 0} lecture{(texte.vues || 0) > 1 ? 's' : ''}

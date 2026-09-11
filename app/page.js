@@ -6,6 +6,7 @@ import TextesFeed from '@/app/components/TextesFeed';
 import AdBanner from '@/app/components/AdBanner';
 import VignettesRow from '@/app/components/VignettesRow';
 import SplashScreen from '@/app/components/SplashScreen';
+import BoutonSurprendsMoi from '@/app/components/BoutonSurprendsMoi';
 
 // Server Component : cette fonction tourne côté serveur à chaque
 // chargement de page, avant l'envoi du HTML au navigateur.
@@ -118,6 +119,7 @@ export default async function HomePage() {
               <Link href="/inscription" className="btn-primary">Créer un compte pour écrire</Link>
             )}
             <a href="#fil" className="btn-outline">Découvrir les textes</a>
+            <BoutonSurprendsMoi className="btn-outline" />
           </div>
         </div>
         <div className="hero-logo">

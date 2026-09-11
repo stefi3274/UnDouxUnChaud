@@ -54,9 +54,14 @@ export async function POST(request) {
 
   const password_hash = await bcrypt.hash(motdepasse, 10);
 
+  const { count: nbComptes } = await supabaseAdmin
+    .from('udc_users')
+    .select('*', { count: 'exact', head: true });
+  const membre_fondateur = (nbComptes || 0) < 100;
+
   const { data: nouvelUtilisateur, error } = await supabaseAdmin
     .from('udc_users')
-    .insert({ pseudo, password_hash, email: emailNormalise })
+    .insert({ pseudo, password_hash, email: emailNormalise, membre_fondateur })
     .select('id, pseudo, role')
     .single();
 

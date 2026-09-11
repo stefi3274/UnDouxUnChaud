@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
 import { verifierLimite } from '@/lib/rateLimit';
+import { creerNotification } from '@/lib/notifications';
 
 export async function POST(request) {
   const user = getSessionUser();
@@ -35,6 +36,11 @@ export async function POST(request) {
 
   if (error) {
     return NextResponse.json({ error: "Erreur lors de l'envoi du commentaire." }, { status: 500 });
+  }
+
+  const { data: texte } = await supabaseAdmin.from('udc_textes').select('user_id').eq('id', texte_id).maybeSingle();
+  if (texte) {
+    await creerNotification({ user_id: texte.user_id, type: 'commentaire', texte_id, acteur_id: user.id });
   }
 
   return NextResponse.json({ commentaire });

@@ -7,9 +7,18 @@ export default function HeaderNav({ user }) {
   const pathname = usePathname();
   const estAccueil = pathname === '/';
   const [ouvert, setOuvert] = useState(false);
+  const [nonLues, setNonLues] = useState(0);
   const menuRef = useRef(null);
 
   useEffect(() => { setOuvert(false); }, [pathname]);
+
+  useEffect(() => {
+    if (!user) return;
+    fetch('/api/notifications')
+      .then((r) => r.json())
+      .then((d) => setNonLues((d.notifications || []).filter((n) => !n.lu).length))
+      .catch(() => {});
+  }, [user]);
 
   useEffect(() => {
     function fermerSiExterieur(e) {
@@ -62,10 +71,20 @@ export default function HeaderNav({ user }) {
             width: 44, height: 44, borderRadius: '50%', border: '1px solid #DDD2BC',
             background: ouvert ? '#2B2620' : '#fff', color: ouvert ? '#fff' : '#2B2620',
             fontSize: '1.2rem', cursor: 'pointer', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', flexShrink: 0,
+            justifyContent: 'center', flexShrink: 0, position: 'relative',
           }}
         >
           {ouvert ? '✕' : '☰'}
+          {!ouvert && nonLues > 0 && (
+            <span style={{
+              position: 'absolute', top: -2, right: -2, background: '#D4321F', color: '#fff',
+              borderRadius: '50%', minWidth: 18, height: 18, fontSize: '0.65rem', fontWeight: 700,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px',
+              border: '2px solid #F8F3E8',
+            }}>
+              {nonLues > 9 ? '9+' : nonLues}
+            </span>
+          )}
         </button>
 
         {ouvert && (
@@ -75,6 +94,9 @@ export default function HeaderNav({ user }) {
             padding: '10px 16px', minWidth: 220, display: 'flex', flexDirection: 'column',
             zIndex: 50,
           }}>
+            {pathname !== '/recherche' && (
+              <Link href="/recherche" style={lienStyle}><span aria-hidden="true">🔍</span> Recherche</Link>
+            )}
             {pathname !== '/creole' && (
               <Link href="/creole" style={lienStyle}><span aria-hidden="true">HT</span> Kreyòl</Link>
             )}
@@ -83,6 +105,9 @@ export default function HeaderNav({ user }) {
             )}
             {pathname !== '/audio' && (
               <Link href="/audio" style={lienStyle}><span aria-hidden="true">🎧</span> Audio</Link>
+            )}
+            {pathname !== '/classement' && (
+              <Link href="/classement" style={lienStyle}><span aria-hidden="true">🏆</span> Classement</Link>
             )}
             {user ? (
               <>
@@ -104,6 +129,20 @@ export default function HeaderNav({ user }) {
                 {!pathname.startsWith('/messages') && (
                   <Link href="/messages" style={lienStyle}><span aria-hidden="true">💬</span> Messages</Link>
                 )}
+                {pathname !== '/notifications' && (
+                  <Link href="/notifications" style={lienStyle}>
+                    <span aria-hidden="true">🔔</span> Notifications
+                    {nonLues > 0 && (
+                      <span style={{
+                        background: '#D4321F', color: '#fff', borderRadius: 100, minWidth: 18, height: 18,
+                        fontSize: '0.68rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center',
+                        justifyContent: 'center', padding: '0 5px', marginLeft: 2,
+                      }}>
+                        {nonLues > 9 ? '9+' : nonLues}
+                      </span>
+                    )}
+                  </Link>
+                )}
                 {user.role === 'admin' && (
                   <>
                     <div style={{ borderTop: '1px solid #DDD2BC', margin: '6px 0' }} />
@@ -124,6 +163,9 @@ export default function HeaderNav({ user }) {
                     )}
                     {pathname !== '/admin/signalements' && (
                       <Link href="/admin/signalements" style={lienAdminStyle}><span aria-hidden="true">🚩</span> Signalements</Link>
+                    )}
+                    {pathname !== '/admin/stats' && (
+                      <Link href="/admin/stats" style={lienAdminStyle}><span aria-hidden="true">📊</span> Statistiques</Link>
                     )}
                   </>
                 )}

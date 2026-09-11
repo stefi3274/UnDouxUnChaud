@@ -4,7 +4,10 @@ import AgeGate from './components/AgeGate';
 
 export const metadata = {
   metadataBase: new URL('https://un-doux-un-chaud.vercel.app'),
-  title: 'UnDouxUnChaud Magazine',
+  title: {
+    default: 'UnDouxUnChaud — Magazine Érotique',
+    template: '%s — UnDouxUnChaud',
+  },
   description: "Du tendre au brûlant, un texte à la fois.",
   icons: {
     icon: [
@@ -14,9 +17,9 @@ export const metadata = {
     apple: '/apple-touch-icon.png',
   },
   openGraph: {
-    title: 'UnDouxUnChaud Magazine',
+    title: 'UnDouxUnChaud — Magazine Érotique',
     description: "Du tendre au brûlant, un texte à la fois.",
-    images: ['/og-image.png'],
+    images: ['/logo.jpg'],
   },
 };
 
