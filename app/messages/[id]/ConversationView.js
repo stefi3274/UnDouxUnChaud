@@ -26,7 +26,6 @@ export default function ConversationView({ conversationId, moi }) {
   const [texteEdition, setTexteEdition] = useState('');
   const [messageMenuOuvertId, setMessageMenuOuvertId] = useState(null);
   const [repondA, setRepondA] = useState(null);
-  const [reactionsOuvertesId, setReactionsOuvertesId] = useState(null);
   const [typeCreation, setTypeCreation] = useState('pin');
   const [nouveauPin, setNouveauPin] = useState('');
   const [afficherNouveauPin, setAfficherNouveauPin] = useState(false);
@@ -130,7 +129,7 @@ export default function ConversationView({ conversationId, moi }) {
   }
 
   async function reagir(messageId, emoji) {
-    setReactionsOuvertesId(null);
+    setMessageMenuOuvertId(null);
     // Mise à jour optimiste simple : on relance juste un chargement silencieux après coup.
     try {
       await fetch(`/api/messages/${conversationId}/${messageId}/reaction`, {
@@ -457,9 +456,7 @@ export default function ConversationView({ conversationId, moi }) {
                   <MenuMessage
                     m={m} estMoi={estMoi} enEdition={enEdition}
                     ouvert={messageMenuOuvertId === m.id}
-                    reactionsOuvertes={reactionsOuvertesId === m.id}
                     onToggleMenu={() => setMessageMenuOuvertId(messageMenuOuvertId === m.id ? null : m.id)}
-                    onToggleReactions={() => setReactionsOuvertesId(reactionsOuvertesId === m.id ? null : m.id)}
                     onRepondre={() => commencerReponse(m)}
                     onReagir={(emoji) => reagir(m.id, emoji)}
                   />
@@ -536,9 +533,7 @@ export default function ConversationView({ conversationId, moi }) {
                   <MenuMessage
                     m={m} estMoi={estMoi} enEdition={enEdition}
                     ouvert={messageMenuOuvertId === m.id}
-                    reactionsOuvertes={reactionsOuvertesId === m.id}
                     onToggleMenu={() => setMessageMenuOuvertId(messageMenuOuvertId === m.id ? null : m.id)}
-                    onToggleReactions={() => setReactionsOuvertesId(reactionsOuvertesId === m.id ? null : m.id)}
                     onRepondre={() => commencerReponse(m)}
                     onReagir={(emoji) => reagir(m.id, emoji)}
                     onModifier={() => { commencerEdition(m); setMessageMenuOuvertId(null); }}
@@ -593,7 +588,7 @@ export default function ConversationView({ conversationId, moi }) {
 
       {erreur && <p style={{ color: '#B23A2E', fontSize: '0.85rem' }}>{erreur}</p>}
 
-      <form onSubmit={envoyer} style={{ display: 'flex', gap: 10, padding: '14px 0', borderTop: '1px solid #DDD2BC', flexShrink: 0 }}>
+      <form onSubmit={envoyer} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '14px 0', borderTop: '1px solid #DDD2BC', flexShrink: 0, minWidth: 0 }}>
         <input ref={fichierRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={envoyerImage} style={{ display: 'none' }} />
         <button
           type="button"
@@ -601,26 +596,42 @@ export default function ConversationView({ conversationId, moi }) {
           disabled={envoiImage}
           aria-label="Envoyer une image"
           style={{
-            width: 42, height: 42, borderRadius: '50%', border: '1px solid #DDD2BC',
-            background: '#fff', fontSize: '1.15rem', cursor: 'pointer', flexShrink: 0,
+            width: 38, height: 38, borderRadius: '50%', border: '1px solid #DDD2BC',
+            background: '#fff', fontSize: '1.05rem', cursor: 'pointer', flexShrink: 0,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
         >
           {envoiImage ? '⏳' : '📎'}
         </button>
-        <EmojiPicker onSelect={insererEmoji} />
-        <input
-          ref={inputRef}
-          value={texte}
-          onChange={(e) => setTexte(e.target.value)}
-          placeholder="Écris un message..."
+
+        <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
+          <div style={{ position: 'absolute', left: 6, top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}>
+            <EmojiPicker onSelect={insererEmoji} compact />
+          </div>
+          <input
+            ref={inputRef}
+            value={texte}
+            onChange={(e) => setTexte(e.target.value)}
+            placeholder="Écris un message..."
+            style={{
+              width: '100%', boxSizing: 'border-box', padding: '11px 14px 11px 44px',
+              border: '1px solid #DDD2BC', borderRadius: 100, fontSize: '0.9rem', background: '#fff',
+            }}
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={!texte.trim()}
+          aria-label="Envoyer"
           style={{
-            flex: 1, padding: '11px 14px', border: '1px solid #DDD2BC', borderRadius: 100,
-            fontSize: '0.9rem', background: '#fff',
+            width: 42, height: 42, borderRadius: '50%', border: 'none', flexShrink: 0,
+            background: texte.trim() ? '#0A5F63' : '#DDD2BC', color: '#fff',
+            fontSize: '1.15rem', cursor: texte.trim() ? 'pointer' : 'default',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1,
           }}
-        />
-        <button type="submit" disabled={!texte.trim()} className="btn-primary" style={{ borderRadius: 100, padding: '11px 20px' }}>
-          Envoyer
+        >
+          ➤
         </button>
       </form>
 
@@ -747,51 +758,39 @@ const itemMenuStylePetit = {
 
 const REACTIONS_RAPIDES = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
 
-function MenuMessage({ m, estMoi, ouvert, reactionsOuvertes, onToggleMenu, onToggleReactions, onRepondre, onReagir, onModifier, onSupprimer }) {
+function MenuMessage({ m, estMoi, ouvert, onToggleMenu, onRepondre, onReagir, onModifier, onSupprimer }) {
   return (
-    <div style={{ position: 'relative', display: 'flex', gap: 0, flexShrink: 0 }}>
-      <button
-        type="button"
-        onClick={onToggleReactions}
-        style={{ background: 'none', border: 'none', color: '#6B6255', cursor: 'pointer', fontSize: '0.95rem', padding: 4 }}
-        aria-label="Réagir"
-      >
-        🙂
-      </button>
+    <div style={{ position: 'relative', flexShrink: 0 }}>
       <button
         type="button"
         onClick={onToggleMenu}
-        style={{ background: 'none', border: 'none', color: '#6B6255', cursor: 'pointer', fontSize: '0.9rem', padding: 4 }}
+        style={{
+          background: 'none', border: 'none', color: '#B7AE9A', cursor: 'pointer',
+          fontSize: '1rem', padding: 4, opacity: 0.7,
+        }}
         aria-label="Options du message"
       >
         ⋯
       </button>
 
-      {reactionsOuvertes && (
-        <div style={{
-          position: 'absolute', bottom: '110%', left: estMoi ? 'auto' : 0, right: estMoi ? 0 : 'auto',
-          background: '#fff', border: '1px solid #DDD2BC', borderRadius: 100,
-          boxShadow: '0 6px 16px rgba(0,0,0,0.12)', display: 'flex', gap: 4, padding: '6px 8px', zIndex: 15,
-        }}>
-          {REACTIONS_RAPIDES.map((emoji) => (
-            <button
-              key={emoji}
-              type="button"
-              onClick={() => onReagir(emoji)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.15rem', padding: 2, lineHeight: 1 }}
-            >
-              {emoji}
-            </button>
-          ))}
-        </div>
-      )}
-
       {ouvert && (
         <div style={{
           position: 'absolute', bottom: '110%', left: estMoi ? 'auto' : 0, right: estMoi ? 0 : 'auto',
-          background: '#fff', border: '1px solid #DDD2BC', borderRadius: 10,
-          boxShadow: '0 6px 16px rgba(0,0,0,0.12)', overflow: 'hidden', minWidth: 150, zIndex: 15,
+          background: '#fff', border: '1px solid #DDD2BC', borderRadius: 14,
+          boxShadow: '0 8px 22px rgba(0,0,0,0.14)', overflow: 'hidden', minWidth: 170, zIndex: 15,
         }}>
+          <div style={{ display: 'flex', gap: 2, padding: '8px 8px 4px', borderBottom: '1px solid #EFE7D8' }}>
+            {REACTIONS_RAPIDES.map((emoji) => (
+              <button
+                key={emoji}
+                type="button"
+                onClick={() => onReagir(emoji)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', padding: 4, lineHeight: 1, borderRadius: 8 }}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
           <button type="button" onClick={onRepondre} style={itemMenuStylePetit}>
             ↩️ Répondre
           </button>
