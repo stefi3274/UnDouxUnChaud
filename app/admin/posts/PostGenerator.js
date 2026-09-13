@@ -47,12 +47,11 @@ const POLICES = {
   public_sans: { label: 'Public Sans (moderne)', css: (taille) => `700 ${taille}px "Public Sans", sans-serif` },
 };
 
-function fitExtrait(ctx, text, maxWidth, maxLines, policeCss) {
-  let fontSize = 58;
-  const minFontSize = 30;
+function fitExtrait(ctx, text, maxWidth, maxLines, policeCss, fontSizeInitial = 58, fontSizeMin = 30) {
+  let fontSize = fontSizeInitial;
   let lines = [];
   let lineHeight = 0;
-  while (fontSize >= minFontSize) {
+  while (fontSize >= fontSizeMin) {
     ctx.font = policeCss(fontSize);
     lines = wrapLines(ctx, text, maxWidth);
     lineHeight = Math.round(fontSize * 1.32);
@@ -60,6 +59,19 @@ function fitExtrait(ctx, text, maxWidth, maxLines, policeCss) {
     fontSize -= 2;
   }
   return { fontSize, lines, lineHeight };
+}
+
+// Choisit une plage de tailles et un nombre de lignes adaptés à la
+// longueur du message, spécifiquement pour les posts libres
+// (invitations) : un message très court peut se permettre d'être
+// beaucoup plus grand et percutant qu'un message long, qui a besoin
+// de plus de lignes pour rester lisible sans être coupé.
+function parametresAdaptatifs(texte) {
+  const nbMots = texte.trim().split(/\s+/).filter(Boolean).length;
+  if (nbMots <= 6) return { initial: 84, min: 48, maxLines: 4 };
+  if (nbMots <= 14) return { initial: 66, min: 38, maxLines: 5 };
+  if (nbMots <= 28) return { initial: 54, min: 30, maxLines: 7 };
+  return { initial: 44, min: 24, maxLines: 9 };
 }
 
 // Dessine du texte avec un espacement de lettres manuel (compatible partout).
@@ -256,7 +268,10 @@ export default function PostGenerator({ textes }) {
       const maxWidth = SIZE - MARGE * 2 - 20;
       const texteExtrait = extrait?.trim() ? extrait.trim() : 'Sélectionne un texte pour voir l\u2019extrait ici.';
       const policeChoisie = mode === 'libre' ? POLICES[police] : POLICES.fraunces;
-      const { fontSize, lines, lineHeight } = fitExtrait(ctx, texteExtrait, maxWidth, 6, policeChoisie.css);
+      const { initial, min, maxLines } = mode === 'libre'
+        ? parametresAdaptatifs(texteExtrait)
+        : { initial: 58, min: 30, maxLines: 6 };
+      const { fontSize, lines, lineHeight } = fitExtrait(ctx, texteExtrait, maxWidth, maxLines, policeChoisie.css, initial, min);
       ctx.font = policeChoisie.css(fontSize);
       ctx.fillStyle = '#FFFFFF';
       ctx.textBaseline = 'alphabetic';

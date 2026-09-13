@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
-import { verifierLimite } from '@/lib/rateLimit';
+import { verifierLimite, obtenirIp } from '@/lib/rateLimit';
 import { creerNotification } from '@/lib/notifications';
 
 export async function POST(request) {
@@ -18,8 +18,12 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Commentaire trop long (2000 caractères maximum).' }, { status: 400 });
   }
 
-  const { autorise } = await verifierLimite(`comment:${user.id}`, 20, 5);
-  if (!autorise) {
+  const ip = obtenirIp(request);
+  const [{ autorise: autorisePersonne }, { autorise: autoriseIp }] = await Promise.all([
+    verifierLimite(`comment:${user.id}`, 20, 5),
+    verifierLimite(`comment-ip:${ip}`, 30, 5),
+  ]);
+  if (!autorisePersonne || !autoriseIp) {
     return NextResponse.json({ error: 'Trop de commentaires envoyés. Ralentis un peu.' }, { status: 429 });
   }
 

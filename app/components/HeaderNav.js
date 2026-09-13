@@ -109,6 +109,9 @@ export default function HeaderNav({ user }) {
             {pathname !== '/classement' && (
               <Link href="/classement" style={lienStyle}><span aria-hidden="true">🏆</span> Classement</Link>
             )}
+            {pathname !== '/concours' && (
+              <Link href="/concours" style={lienStyle}><span aria-hidden="true">🎁</span> Concours</Link>
+            )}
             {user ? (
               <>
                 <div style={{ color: '#6B6255', fontSize: '0.85rem', padding: '8px 4px', borderBottom: '1px solid #DDD2BC', marginBottom: 4 }}>
@@ -166,6 +169,9 @@ export default function HeaderNav({ user }) {
                     )}
                     {pathname !== '/admin/stats' && (
                       <Link href="/admin/stats" style={lienAdminStyle}><span aria-hidden="true">📊</span> Statistiques</Link>
+                    )}
+                    {pathname !== '/admin/concours' && (
+                      <Link href="/admin/concours" style={lienAdminStyle}><span aria-hidden="true">🎁</span> Concours</Link>
                     )}
                   </>
                 )}

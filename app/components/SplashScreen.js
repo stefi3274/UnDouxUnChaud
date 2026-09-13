@@ -7,6 +7,19 @@ export default function SplashScreen() {
   const [disparait, setDisparait] = useState(false);
 
   useEffect(() => {
+    let ageConfirme = null;
+    try {
+      ageConfirme = localStorage.getItem('udc_age_confirme');
+    } catch {}
+
+    // Si l'âge n'est pas encore confirmé, la bannière d'âge (avec son
+    // propre logo) va s'afficher juste après — inutile de montrer les
+    // deux écrans de marque à la suite.
+    if (ageConfirme !== '1') {
+      setVisible(false);
+      return;
+    }
+
     const dejaVu = sessionStorage.getItem('udc_splash_vu');
     if (dejaVu === '1') {
       setVisible(false);

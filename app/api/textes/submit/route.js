@@ -23,7 +23,7 @@ export async function POST(request) {
     orientation_hh, orientation_ff,
     tags, avertissements,
     image_url, image_credit, serie_titre, chapitre_numero,
-    consentement_certifie,
+    consentement_certifie, concours_id,
   } = body;
 
   if (!titre || !contenu || !categorie) {
@@ -49,6 +49,19 @@ export async function POST(request) {
     return NextResponse.json({ error: 'La certification de consentement est obligatoire.' }, { status: 400 });
   }
 
+  let concoursValide = null;
+  if (concours_id) {
+    const maintenant = new Date().toISOString();
+    const { data: c } = await supabaseAdmin
+      .from('udc_concours')
+      .select('id')
+      .eq('id', concours_id)
+      .lte('date_debut', maintenant)
+      .gte('date_fin', maintenant)
+      .maybeSingle();
+    if (c) concoursValide = c.id;
+  }
+
   const { data: texte, error } = await supabaseAdmin
     .from('udc_textes')
     .insert({
@@ -67,6 +80,7 @@ export async function POST(request) {
       chapitre_numero: chapitre_numero || null,
       consentement_certifie: true,
       statut: 'en_attente',
+      concours_id: concoursValide,
     })
     .select('id')
     .single();

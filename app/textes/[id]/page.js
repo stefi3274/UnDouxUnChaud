@@ -8,6 +8,7 @@ import MessageAuteurButton from './MessageAuteurButton';
 import RegistrerLecture from './RegistrerLecture';
 import CoupDeCoeurToggle from './CoupDeCoeurToggle';
 import { EtoilesAffichage, EtoilesVote } from '@/app/components/Etoiles';
+import BoutonsPartage from '@/app/components/BoutonsPartage';
 import { lireIdentifiant } from '@/lib/visiteur';
 
 const COULEURS_CATEGORIE = {
@@ -237,6 +238,12 @@ export default async function TextePage({ params }) {
             <EtoilesVote texteId={texte.id} couleur={couleurCategorie} maNoteInitiale={maNote} />
           </div>
         </div>
+
+        <BoutonsPartage
+          url={`https://un-doux-un-chaud.vercel.app/textes/${texte.id}`}
+          titre={texte.titre}
+          style={{ marginTop: 18 }}
+        />
 
         <TexteInteractions
           texteId={texte.id}

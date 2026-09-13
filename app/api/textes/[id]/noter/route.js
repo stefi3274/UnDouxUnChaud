@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { obtenirIdentifiant } from '@/lib/visiteur';
-import { verifierLimite } from '@/lib/rateLimit';
+import { verifierLimite, obtenirIp } from '@/lib/rateLimit';
 
 export async function POST(request, { params }) {
   const { note } = await request.json();
@@ -13,16 +13,31 @@ export async function POST(request, { params }) {
 
   const identifiant = obtenirIdentifiant();
   const texteId = params.id;
+  const ip = obtenirIp(request);
 
-  const { autorise } = await verifierLimite(`vote:${identifiant}`, 40, 5);
-  if (!autorise) {
+  const { data: texte } = await supabaseAdmin.from('udc_textes').select('user_id').eq('id', texteId).maybeSingle();
+  if (!texte) {
+    return NextResponse.json({ error: 'Texte introuvable.' }, { status: 404 });
+  }
+  if (identifiant === `user:${texte.user_id}`) {
+    return NextResponse.json({ error: 'Tu ne peux pas noter ton propre texte.' }, { status: 403 });
+  }
+
+  // Deux limites cumulées : une par personne/cookie (déjà en place),
+  // une par adresse IP (empêche de contourner la première en
+  // changeant simplement de cookie/navigateur).
+  const [{ autorise: autorisePersonne }, { autorise: autoriseIp }] = await Promise.all([
+    verifierLimite(`vote:${identifiant}`, 40, 5),
+    verifierLimite(`vote-ip:${ip}`, 60, 10),
+  ]);
+  if (!autorisePersonne || !autoriseIp) {
     return NextResponse.json({ error: 'Trop de votes. Ralentis un peu.' }, { status: 429 });
   }
 
   const { error } = await supabaseAdmin
     .from('udc_notes')
     .upsert(
-      { texte_id: texteId, identifiant, note: noteNombre, updated_at: new Date().toISOString() },
+      { texte_id: texteId, identifiant, note: noteNombre, updated_at: new Date().toISOString(), ip },
       { onConflict: 'texte_id,identifiant' }
     );
 

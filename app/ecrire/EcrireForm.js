@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ChampSerie from '@/app/components/ChampSerie';
 
@@ -60,6 +60,15 @@ export default function EcrireForm() {
   const [categorie, setCategorie] = useState('un_doux');
   const [langue, setLangue] = useState('fr');
   const [isSeries, setIsSeries] = useState(false);
+  const [concoursActifs, setConcoursActifs] = useState([]);
+  const [concoursId, setConcoursId] = useState('');
+
+  useEffect(() => {
+    fetch('/api/concours/actifs')
+      .then((r) => r.json())
+      .then((d) => setConcoursActifs(d.concours || []))
+      .catch(() => {});
+  }, []);
   const [serieTitre, setSerieTitre] = useState('');
   const [chapitreNum, setChapitreNum] = useState('');
   const [imageUrl, setImageUrl] = useState('');
@@ -131,6 +140,7 @@ export default function EcrireForm() {
         image_credit: imageUrl ? (imageCredit || null) : null,
         serie_titre: isSeries ? serieTitre : null,
         chapitre_numero: isSeries && chapitreNum ? parseInt(chapitreNum, 10) : null,
+        concours_id: concoursId || null,
         consentement_certifie: consentement,
       }),
     });
@@ -227,6 +237,18 @@ export default function EcrireForm() {
           chapitreNum={chapitreNum} setChapitreNum={setChapitreNum}
           inputStyle={inputStyle}
         />
+
+        {concoursActifs.length > 0 && (
+          <div style={{ marginBottom: 20 }}>
+            <label style={labelStyle}>🏆 Participer à un concours (optionnel)</label>
+            <select value={concoursId} onChange={(e) => setConcoursId(e.target.value)} style={inputStyle}>
+              <option value="">— Aucun —</option>
+              {concoursActifs.map((c) => (
+                <option key={c.id} value={c.id}>{c.titre}</option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div style={{ marginBottom: 20 }}>
           <label style={labelStyle}>Image d'illustration (optionnelle)</label>
