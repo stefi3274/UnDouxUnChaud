@@ -6,6 +6,23 @@ import { urlAvatar } from '@/lib/avatar';
 import EmojiPicker from '@/app/components/EmojiPicker';
 import { compresserImage } from '@/lib/compresserImage';
 
+function formatHeure(dateStr) {
+  return new Date(dateStr).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function formatSeparateurDate(dateStr) {
+  const date = new Date(dateStr);
+  const aujourdHui = new Date();
+  const hier = new Date();
+  hier.setDate(aujourdHui.getDate() - 1);
+
+  const memeJour = (a, b) => a.toDateString() === b.toDateString();
+
+  if (memeJour(date, aujourdHui)) return "Aujourd'hui";
+  if (memeJour(date, hier)) return 'Hier';
+  return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
 export default function ConversationView({ conversationId, moi }) {
   const [meta, setMeta] = useState(null); // { autreUtilisateur, verrouillee, aPinDefini }
   const [deverrouille, setDeverrouille] = useState(false);
@@ -431,26 +448,44 @@ export default function ConversationView({ conversationId, moi }) {
             Dis bonjour à @{meta?.autreUtilisateur?.pseudo} 👋
           </p>
         )}
-        {messages.map((m) => {
+        {messages.map((m, index) => {
           const estMoi = m.sender_id === moi.id;
           const enEdition = messageEnEditionId === m.id;
+          const messagePrecedent = messages[index - 1];
+          const nouveauJour = !messagePrecedent || new Date(messagePrecedent.created_at).toDateString() !== new Date(m.created_at).toDateString();
+
+          const separateur = nouveauJour && (
+            <div key={`sep-${m.id}`} style={{ textAlign: 'center', margin: '10px 0' }}>
+              <span style={{
+                background: '#F8F3E8', color: '#6B6255', fontSize: '0.72rem', fontWeight: 600,
+                padding: '4px 14px', borderRadius: 100, border: '1px solid #DDD2BC',
+              }}>
+                {formatSeparateurDate(m.created_at)}
+              </span>
+            </div>
+          );
 
           if (m.supprime) {
             return (
-              <div key={m.id} style={{ display: 'flex', justifyContent: estMoi ? 'flex-end' : 'flex-start' }}>
-                <div style={{
-                  maxWidth: '75%', padding: '10px 14px', borderRadius: 16,
-                  background: 'transparent', border: '1px dashed #DDD2BC',
-                  color: '#6B6255', fontStyle: 'italic', fontSize: '0.85rem',
-                }}>
-                  Message supprimé
+              <div key={m.id}>
+                {separateur}
+                <div style={{ display: 'flex', justifyContent: estMoi ? 'flex-end' : 'flex-start' }}>
+                  <div style={{
+                    maxWidth: '75%', padding: '10px 14px', borderRadius: 16,
+                    background: 'transparent', border: '1px dashed #DDD2BC',
+                    color: '#6B6255', fontStyle: 'italic', fontSize: '0.85rem',
+                  }}>
+                    Message supprimé
+                  </div>
                 </div>
               </div>
             );
           }
 
           return (
-            <div key={m.id} style={{ display: 'flex', flexDirection: 'column', alignItems: estMoi ? 'flex-end' : 'flex-start', gap: 3 }}>
+            <div key={m.id}>
+              {separateur}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: estMoi ? 'flex-end' : 'flex-start', gap: 3 }}>
               <div style={{ display: 'flex', justifyContent: estMoi ? 'flex-end' : 'flex-start', alignItems: 'flex-end', gap: 6, width: '100%' }}>
                 {!estMoi && (
                   <MenuMessage
@@ -520,11 +555,21 @@ export default function ConversationView({ conversationId, moi }) {
                       {m.contenu && (
                         <div style={{ padding: m.image_path ? '8px 6px 2px' : 0 }}>{m.contenu}</div>
                       )}
-                      {(m.modifie_le || m.enAttente || m.echoue) && (
-                        <div style={{ fontSize: '0.68rem', opacity: 0.7, marginTop: 3, padding: m.image_path ? '0 6px' : 0 }}>
-                          {m.echoue ? "⚠️ échec de l'envoi" : m.enAttente ? 'envoi...' : '(modifié)'}
-                        </div>
-                      )}
+                      <div style={{
+                        fontSize: '0.68rem', opacity: 0.7, marginTop: 3, padding: m.image_path ? '0 6px' : 0,
+                        display: 'flex', gap: 6, alignItems: 'center',
+                      }}>
+                        {m.echoue
+                          ? "⚠️ échec de l'envoi"
+                          : m.enAttente
+                            ? 'envoi...'
+                            : (
+                              <>
+                                {formatHeure(m.created_at)}
+                                {m.modifie_le && <span>· modifié</span>}
+                              </>
+                            )}
+                      </div>
                     </>
                   )}
                 </div>
@@ -560,6 +605,7 @@ export default function ConversationView({ conversationId, moi }) {
                   ))}
                 </div>
               )}
+            </div>
             </div>
           );
         })}
