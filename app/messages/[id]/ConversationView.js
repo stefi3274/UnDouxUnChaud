@@ -11,6 +11,38 @@ function formatHeure(dateStr) {
   return new Date(dateStr).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 }
 
+// Découpe un texte de message et transforme les URL en vrais liens cliquables
+// (ouverts dans un nouvel onglet), tout en laissant le reste du texte intact.
+// Une regex fraîche à chaque appel : évite tout effet de bord lié au flag
+// global (lastIndex partagé) quand la fonction est appelée pour plusieurs
+// messages lors d'un même rendu.
+function rendreTexteAvecLiens(texte, couleurLien) {
+  if (!texte) return texte;
+  const regexLien = /(https?:\/\/[^\s<]+[^\s<.,;:!?')\]]|www\.[^\s<]+[^\s<.,;:!?')\]])/gi;
+  // Avec un seul groupe capturant et le flag global, split() alterne
+  // texte normal / lien trouvé (index impair = lien).
+  const parts = texte.split(regexLien);
+  return parts.map((part, i) => {
+    if (!part) return null;
+    if (i % 2 === 1) {
+      const href = part.startsWith('http') ? part : `https://${part}`;
+      return (
+        <a
+          key={i}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer nofollow"
+          onClick={(e) => e.stopPropagation()}
+          style={{ color: couleurLien, textDecoration: 'underline', wordBreak: 'break-all' }}
+        >
+          {part}
+        </a>
+      );
+    }
+    return <span key={i}>{part}</span>;
+  });
+}
+
 function formatSeparateurDate(dateStr) {
   const date = new Date(dateStr);
   const aujourdHui = new Date();
@@ -43,6 +75,7 @@ export default function ConversationView({ conversationId, moi }) {
   const [messageEnEditionId, setMessageEnEditionId] = useState(null);
   const [texteEdition, setTexteEdition] = useState('');
   const [messageMenuOuvertId, setMessageMenuOuvertId] = useState(null);
+  const [messageSurligneId, setMessageSurligneId] = useState(null);
   const [repondA, setRepondA] = useState(null);
   const [typeCreation, setTypeCreation] = useState('pin');
   const [nouveauPin, setNouveauPin] = useState('');
@@ -51,6 +84,17 @@ export default function ConversationView({ conversationId, moi }) {
   const finDeFil = useRef(null);
   const inputRef = useRef(null);
   const fichierRef = useRef(null);
+  const messageRefs = useRef({});
+
+  // Fait défiler jusqu'au message d'origine d'une réponse et le surligne
+  // brièvement, pour qu'on le retrouve facilement dans le fil.
+  function allerAuMessage(id) {
+    const el = messageRefs.current[id];
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setMessageSurligneId(id);
+    setTimeout(() => setMessageSurligneId((actuel) => (actuel === id ? null : actuel)), 1600);
+  }
 
   async function chargerMeta() {
     const res = await fetch(`/api/messages/${conversationId}/meta`);
@@ -496,7 +540,7 @@ export default function ConversationView({ conversationId, moi }) {
 
           if (m.supprime) {
             return (
-              <div key={m.id}>
+              <div key={m.id} ref={(el) => { messageRefs.current[m.id] = el; }}>
                 {separateur}
                 <div style={{ display: 'flex', justifyContent: estMoi ? 'flex-end' : 'flex-start' }}>
                   <div style={{
@@ -512,7 +556,7 @@ export default function ConversationView({ conversationId, moi }) {
           }
 
           return (
-            <div key={m.id}>
+            <div key={m.id} ref={(el) => { messageRefs.current[m.id] = el; }}>
               {separateur}
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: estMoi ? 'flex-end' : 'flex-start', gap: 3 }}>
               <div style={{ display: 'flex', justifyContent: estMoi ? 'flex-end' : 'flex-start', alignItems: 'flex-end', gap: 6, width: '100%' }}>
@@ -534,14 +578,22 @@ export default function ConversationView({ conversationId, moi }) {
                   borderBottomLeftRadius: estMoi ? 16 : 4,
                   fontSize: '0.92rem', lineHeight: 1.4, whiteSpace: 'pre-wrap',
                   opacity: m.enAttente ? 0.6 : 1,
+                  boxShadow: messageSurligneId === m.id ? '0 0 0 3px #E08A1D' : 'none',
+                  transition: 'box-shadow 0.3s ease',
                 }}>
                   {m.messageOriginal && (
-                    <div style={{
-                      borderLeft: `3px solid ${estMoi ? 'rgba(255,255,255,0.5)' : '#0A5F63'}`,
-                      background: estMoi ? 'rgba(255,255,255,0.12)' : 'rgba(10,95,99,0.08)',
-                      padding: '6px 10px', borderRadius: 8, marginBottom: 6, fontSize: '0.82rem',
-                      opacity: 0.9,
-                    }}>
+                    <div
+                      onClick={() => allerAuMessage(m.messageOriginal.id)}
+                      role="button"
+                      tabIndex={0}
+                      title="Aller au message d'origine"
+                      style={{
+                        borderLeft: `3px solid ${estMoi ? 'rgba(255,255,255,0.5)' : '#0A5F63'}`,
+                        background: estMoi ? 'rgba(255,255,255,0.12)' : 'rgba(10,95,99,0.08)',
+                        padding: '6px 10px', borderRadius: 8, marginBottom: 6, fontSize: '0.82rem',
+                        opacity: 0.9, cursor: 'pointer',
+                      }}
+                    >
                       {m.messageOriginal.supprime
                         ? <em>Message supprimé</em>
                         : m.messageOriginal.image_path
@@ -582,7 +634,9 @@ export default function ConversationView({ conversationId, moi }) {
                   ) : (
                     <>
                       {m.contenu && (
-                        <div style={{ padding: m.image_path ? '8px 6px 2px' : 0 }}>{m.contenu}</div>
+                        <div style={{ padding: m.image_path ? '8px 6px 2px' : 0 }}>
+                          {rendreTexteAvecLiens(m.contenu, estMoi ? '#BFEFEA' : '#0A5F63')}
+                        </div>
                       )}
                       <div style={{
                         fontSize: '0.68rem', opacity: 0.7, marginTop: 3, padding: m.image_path ? '0 6px' : 0,
