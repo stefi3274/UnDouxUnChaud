@@ -5,6 +5,7 @@ import HeaderNav from '@/app/components/HeaderNav';
 import Link from 'next/link';
 import { urlAvatar } from '@/lib/avatar';
 import SuivreBouton from './SuivreBouton';
+import { estEnLigne } from '@/lib/presence';
 
 const LABELS_CATEGORIE = {
   un_doux: 'Un Doux', un_chaud: 'Un Chaud', piment: 'Piment', piquant: 'Piquant',
@@ -14,7 +15,7 @@ const LABELS_CATEGORIE = {
 async function getAuteur(pseudo) {
   const { data } = await supabasePublic
     .from('udc_users')
-    .select('id, pseudo, bio, avatar_path, membre_fondateur, created_at')
+    .select('id, pseudo, bio, avatar_path, membre_fondateur, created_at, dernier_actif')
     .ilike('pseudo', pseudo)
     .maybeSingle();
   return data;
@@ -53,17 +54,33 @@ export default async function AuteurPage({ params }) {
       <HeaderNav user={user} />
       <main style={{ maxWidth: 720, margin: '0 auto', padding: '5vw 6vw 8vw' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
-          <div style={{
-            width: 84, height: 84, borderRadius: '50%', border: '2px solid #DDD2BC',
-            background: avatar ? `url(${avatar}) center/cover no-repeat` : '#F8F3E8',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '1.8rem', fontWeight: 700, color: '#0A5F63', flexShrink: 0,
-          }}>
-            {!avatar && (auteur.pseudo?.[0]?.toUpperCase() || '?')}
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            <div style={{
+              width: 84, height: 84, borderRadius: '50%', border: '2px solid #DDD2BC',
+              background: avatar ? `url(${avatar}) center/cover no-repeat` : '#F8F3E8',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '1.8rem', fontWeight: 700, color: '#0A5F63',
+            }}>
+              {!avatar && (auteur.pseudo?.[0]?.toUpperCase() || '?')}
+            </div>
+            {estEnLigne(auteur.dernier_actif) && (
+              <span
+                title="En ligne"
+                style={{
+                  position: 'absolute', bottom: 4, right: 4, width: 16, height: 16, borderRadius: '50%',
+                  background: '#2FAE5C', border: '3px solid #fff',
+                }}
+              />
+            )}
           </div>
           <div style={{ flex: 1, minWidth: 200 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
               <h1 style={{ fontFamily: 'Fraunces, serif' }}>@{auteur.pseudo}</h1>
+              {estEnLigne(auteur.dernier_actif) && (
+                <span style={{ background: '#E3F1EF', color: '#2FAE5C', fontSize: '0.7rem', fontWeight: 700, padding: '3px 10px', borderRadius: 100 }}>
+                  ● En ligne
+                </span>
+              )}
               {auteur.membre_fondateur && (
                 <span style={{ background: '#C9A227', color: '#fff', fontSize: '0.7rem', fontWeight: 700, padding: '3px 10px', borderRadius: 100 }}>
                   🌟 Membre fondateur

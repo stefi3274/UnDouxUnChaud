@@ -10,7 +10,7 @@ export async function GET() {
 
   const { data: conversations, error } = await supabaseAdmin
     .from('udc_conversations')
-    .select('id, user1_id, user2_id, created_at, udc_users_user1:user1_id(pseudo, avatar_path), udc_users_user2:user2_id(pseudo, avatar_path)')
+    .select('id, user1_id, user2_id, created_at, udc_users_user1:user1_id(pseudo, avatar_path, dernier_actif), udc_users_user2:user2_id(pseudo, avatar_path, dernier_actif)')
     .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`)
     .order('created_at', { ascending: false });
 
@@ -28,6 +28,7 @@ export async function GET() {
     (conversations || []).map(async (c) => {
       const autrePseudo = c.user1_id === user.id ? c.udc_users_user2?.pseudo : c.udc_users_user1?.pseudo;
       const autreAvatar = c.user1_id === user.id ? c.udc_users_user2?.avatar_path : c.udc_users_user1?.avatar_path;
+      const autreDernierActif = c.user1_id === user.id ? c.udc_users_user2?.dernier_actif : c.udc_users_user1?.dernier_actif;
       const autreId = c.user1_id === user.id ? c.user2_id : c.user1_id;
 
       const { data: dernierMessage } = await supabaseAdmin
@@ -50,6 +51,7 @@ export async function GET() {
         autreId,
         autrePseudo,
         autreAvatar,
+        autreDernierActif,
         dernierMessage: dernierMessage?.image_path
           ? `📷 Image${dernierMessage.contenu ? ' · ' + dernierMessage.contenu : ''}`
           : dernierMessage?.contenu || null,

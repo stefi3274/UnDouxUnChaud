@@ -59,7 +59,12 @@ export async function generateMetadata({ params }) {
 }
 
 async function getCommentaires(texteId) {
-  const { data } = await supabasePublic
+  // supabaseAdmin utilisé ici (comme dans /profil pour "mes commentaires")
+  // car la lecture via la clé anonyme (RLS) peut, selon la policy sur
+  // udc_users jointe, masquer certaines lignes (dont celles de l'auteur
+  // connecté). Les commentaires sont publics de toute façon : aucun risque
+  // à les lire côté serveur avec le service role.
+  const { data } = await supabaseAdmin
     .from('udc_commentaires')
     .select('*, udc_users(pseudo)')
     .eq('texte_id', texteId)

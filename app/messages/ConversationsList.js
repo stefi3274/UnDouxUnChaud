@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { urlAvatar } from '@/lib/avatar';
+import { estEnLigne } from '@/lib/presence';
 
 function tempsRelatif(dateStr) {
   const diffMs = Date.now() - new Date(dateStr).getTime();
@@ -24,15 +25,26 @@ function LigneConversation({ c }) {
         background: '#fff', border: '1px solid #DDD2BC', borderRadius: 14, padding: '14px 16px',
       }}
     >
-      <div style={{
-        width: 42, height: 42, borderRadius: '50%', background: '#F8F3E8', flexShrink: 0,
-        display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#0A5F63',
-        overflow: 'hidden',
-      }}>
-        {urlAvatar(c.autreAvatar) ? (
-          <img src={urlAvatar(c.autreAvatar)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        ) : (
-          c.autrePseudo?.[0]?.toUpperCase() || '?'
+      <div style={{ position: 'relative', flexShrink: 0 }}>
+        <div style={{
+          width: 42, height: 42, borderRadius: '50%', background: '#F8F3E8',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#0A5F63',
+          overflow: 'hidden',
+        }}>
+          {urlAvatar(c.autreAvatar) ? (
+            <img src={urlAvatar(c.autreAvatar)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            c.autrePseudo?.[0]?.toUpperCase() || '?'
+          )}
+        </div>
+        {estEnLigne(c.autreDernierActif) && (
+          <span
+            title="En ligne"
+            style={{
+              position: 'absolute', bottom: 0, right: 0, width: 12, height: 12, borderRadius: '50%',
+              background: '#2FAE5C', border: '2px solid #fff',
+            }}
+          />
         )}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>

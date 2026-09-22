@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { urlAvatar } from '@/lib/avatar';
+import { estEnLigne } from '@/lib/presence';
 import EmojiPicker from '@/app/components/EmojiPicker';
 import { compresserImage } from '@/lib/compresserImage';
 
@@ -59,7 +60,12 @@ export default function ConversationView({ conversationId, moi }) {
     setChargement(false);
   }
 
-  useEffect(() => { chargerMeta(); }, [conversationId]);
+  useEffect(() => {
+    chargerMeta();
+    // Rafraîchit régulièrement le statut "en ligne" de l'interlocuteur.
+    const intervalle = setInterval(chargerMeta, 20000);
+    return () => clearInterval(intervalle);
+  }, [conversationId]);
 
   async function chargerMessages(silencieux = false) {
     if (!silencieux) setChargement(true);
@@ -400,12 +406,30 @@ export default function ConversationView({ conversationId, moi }) {
             border: '1px solid #DDD2BC', borderRadius: '50%', width: 36, height: 36,
             display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
           }}>⬅️</Link>
-          <span style={{ fontWeight: 700, fontFamily: 'Fraunces, serif', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
-            {urlAvatar(meta?.autreUtilisateur?.avatar_path) ? (
-              <img src={urlAvatar(meta.autreUtilisateur.avatar_path)} alt="" style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover' }} />
-            ) : null}
-            @{meta?.autreUtilisateur?.pseudo}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ position: 'relative', flexShrink: 0 }}>
+              {urlAvatar(meta?.autreUtilisateur?.avatar_path) ? (
+                <img src={urlAvatar(meta.autreUtilisateur.avatar_path)} alt="" style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover' }} />
+              ) : null}
+              {estEnLigne(meta?.autreUtilisateur?.dernier_actif) && (
+                <span
+                  title="En ligne"
+                  style={{
+                    position: 'absolute', bottom: -1, right: -1, width: 10, height: 10, borderRadius: '50%',
+                    background: '#2FAE5C', border: '2px solid #fff',
+                  }}
+                />
+              )}
+            </div>
+            <div>
+              <div style={{ fontWeight: 700, fontFamily: 'Fraunces, serif', fontSize: '1.1rem' }}>
+                @{meta?.autreUtilisateur?.pseudo}
+              </div>
+              {estEnLigne(meta?.autreUtilisateur?.dernier_actif) && (
+                <div style={{ fontSize: '0.72rem', color: '#2FAE5C', fontWeight: 600 }}>En ligne</div>
+              )}
+            </div>
+          </div>
         </div>
         <div style={{ position: 'relative' }}>
           <button
