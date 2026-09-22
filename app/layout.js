@@ -1,5 +1,5 @@
 import './globals.css';
-import Footer from './components/Footer';
+import ConditionalFooter from './components/ConditionalFooter';
 import AgeGate from './components/AgeGate';
 
 export const metadata = {
@@ -35,7 +35,7 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         {children}
-        <Footer />
+        <ConditionalFooter />
         <AgeGate />
       </body>
     </html>

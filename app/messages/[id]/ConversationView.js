@@ -85,7 +85,12 @@ export default function ConversationView({ conversationId, moi }) {
     chargerMessages();
     const intervalle = setInterval(() => chargerMessages(true), 3000);
     return () => clearInterval(intervalle);
-  }, [meta, deverrouille]);
+    // On ne dépend QUE de meta.verrouillee (pas de l'objet meta entier) :
+    // meta est réécrit toutes les 20s pour rafraîchir le statut "en ligne",
+    // ce qui recréait cet effet à chaque fois, remettait la conversation en
+    // "Chargement..." et faisait perdre le texte en cours de saisie.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [meta?.verrouillee, deverrouille]);
 
   useEffect(() => {
     finDeFil.current?.scrollIntoView({ block: 'end' });
