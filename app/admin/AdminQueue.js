@@ -33,6 +33,7 @@ export default function AdminQueue({ textes }) {
   const [refuseOpenId, setRefuseOpenId] = useState(null);
   const [raison, setRaison] = useState('');
   const [chargement, setChargement] = useState(null);
+  const [texteOuvertId, setTexteOuvertId] = useState(null);
 
   async function accepter(id) {
     setChargement(id);
@@ -152,9 +153,43 @@ export default function AdminQueue({ textes }) {
               </div>
             </div>
 
-            <p style={{ fontSize: '0.88rem', color: '#6B6255', marginTop: 16, lineHeight: 1.6, fontFamily: 'Fraunces, serif' }}>
-              {t.contenu.slice(0, 220)}...
-            </p>
+            {texteOuvertId === t.id ? (
+              <div style={{
+                marginTop: 16, background: '#F8F3E8', border: '1px solid #DDD2BC', borderRadius: 12,
+                padding: '16px 18px',
+              }}>
+                <p style={{
+                  fontSize: '0.92rem', color: '#2B2620', lineHeight: 1.8, fontFamily: 'Fraunces, serif',
+                  whiteSpace: 'pre-wrap', margin: 0,
+                }}>
+                  {t.contenu}
+                </p>
+                <button
+                  onClick={() => setTexteOuvertId(null)}
+                  style={{
+                    marginTop: 14, background: 'none', border: '1px solid #DDD2BC', borderRadius: 100,
+                    padding: '7px 16px', fontWeight: 600, cursor: 'pointer', fontSize: '0.82rem', color: '#2B2620',
+                  }}
+                >
+                  Réduire
+                </button>
+              </div>
+            ) : (
+              <>
+                <p style={{ fontSize: '0.88rem', color: '#6B6255', marginTop: 16, lineHeight: 1.6, fontFamily: 'Fraunces, serif' }}>
+                  {t.contenu.slice(0, 220)}...
+                </p>
+                <button
+                  onClick={() => setTexteOuvertId(t.id)}
+                  style={{
+                    background: 'none', border: 'none', color: '#0A5F63', fontWeight: 700,
+                    cursor: 'pointer', fontSize: '0.85rem', padding: 0,
+                  }}
+                >
+                  📖 Lire le texte complet
+                </button>
+              </>
+            )}
 
             {refuseOpenId === t.id && (
               <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #DDD2BC' }}>

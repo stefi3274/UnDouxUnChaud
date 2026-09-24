@@ -37,6 +37,7 @@ export default function PublierAudioForm() {
   const [envoi, setEnvoi] = useState(false);
   const [progression, setProgression] = useState('');
   const [erreur, setErreur] = useState('');
+  const [consentement, setConsentement] = useState(false);
 
   function choisirFichier(e) {
     const f = e.target.files?.[0];
@@ -61,6 +62,7 @@ export default function PublierAudioForm() {
 
     if (!fichier) { setErreur('Choisis un fichier audio.'); return; }
     if (!titre.trim()) { setErreur('Le titre est requis.'); return; }
+    if (!consentement) { setErreur('La certification de consentement est obligatoire.'); return; }
 
     setEnvoi(true);
     try {
@@ -88,6 +90,7 @@ export default function PublierAudioForm() {
           titre, description, categorie, audio_path: path, duree_secondes: duree,
           serie_titre: estSerie && serieTitre.trim() ? serieTitre.trim() : null,
           chapitre_numero: estSerie && chapitreNum ? parseInt(chapitreNum, 10) : null,
+          consentement_certifie: consentement,
         }),
       });
       const dataSubmit = await resSubmit.json();
@@ -159,6 +162,18 @@ export default function PublierAudioForm() {
         chapitreNum={chapitreNum} setChapitreNum={setChapitreNum}
         inputStyle={inputStyle}
       />
+
+      <div style={{
+        display: 'flex', gap: 10, alignItems: 'flex-start', background: '#FBF1DF',
+        border: '1px solid #E8D4A8', borderRadius: 12, padding: '14px 16px', marginBottom: 20,
+      }}>
+        <input type="checkbox" checked={consentement} onChange={(e) => setConsentement(e.target.checked)} style={{ marginTop: 3 }} required />
+        <label style={{ fontSize: '0.88rem' }}>
+          Je certifie que cet enregistrement met en scène uniquement des personnes consentantes de 18 ans ou
+          plus, et qu'il ne contient aucune référence à des mineurs, à la pédophilie ou à des actes impliquant
+          des animaux (zoophilie). Tout contenu enfreignant cette règle sera refusé et signalé.
+        </label>
+      </div>
 
       {erreur && (
         <p style={{ background: '#FBE7E4', color: '#B23A2E', padding: '10px 14px', borderRadius: 10, marginBottom: 16, fontSize: '0.85rem' }}>

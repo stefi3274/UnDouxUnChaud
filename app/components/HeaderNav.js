@@ -173,6 +173,9 @@ export default function HeaderNav({ user }) {
                     {pathname !== '/admin/posts' && (
                       <Link href="/admin/posts" style={lienAdminStyle}><span aria-hidden="true">🖼️</span> Posts</Link>
                     )}
+                    {pathname !== '/admin/textes' && (
+                      <Link href="/admin/textes" style={lienAdminStyle}><span aria-hidden="true">📚</span> Textes publiés</Link>
+                    )}
                     {pathname !== '/admin/photos' && (
                       <Link href="/admin/photos" style={lienAdminStyle}><span aria-hidden="true">📸</span> Photos</Link>
                     )}

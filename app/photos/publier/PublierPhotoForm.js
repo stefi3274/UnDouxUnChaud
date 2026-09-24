@@ -133,7 +133,11 @@ export default function PublierPhotoForm() {
         </label>
         <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: '0.88rem', cursor: 'pointer' }}>
           <input type="checkbox" checked={majeur} onChange={(e) => setMajeur(e.target.checked)} style={{ marginTop: 3 }} />
-          <span>Je confirme que toutes les personnes visibles sur cette photo, moi y compris, ont 18 ans ou plus.</span>
+          <span>
+            Je confirme que toutes les personnes visibles sur cette photo, moi y compris, ont 18 ans ou plus,
+            et que cette image ne contient aucune référence à des mineurs, à la pédophilie ou à des actes
+            impliquant des animaux (zoophilie). Tout contenu enfreignant cette règle sera refusé et signalé.
+          </span>
         </label>
       </div>
 

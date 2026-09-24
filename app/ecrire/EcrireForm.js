@@ -350,7 +350,10 @@ export default function EcrireForm() {
         }}>
           <input type="checkbox" checked={consentement} onChange={(e) => setConsentement(e.target.checked)} style={{ marginTop: 3 }} required />
           <label style={{ fontSize: '0.88rem' }}>
-            Je certifie que ce texte décrit uniquement des pratiques consensuelles entre adultes.
+            Je certifie que ce texte décrit uniquement des pratiques consensuelles entre adultes (18 ans ou plus),
+            et qu'il ne contient aucune référence à des mineurs, à la pédophilie ou à des actes sexuels
+            impliquant des animaux (zoophilie). Je comprends que tout contenu enfreignant cette règle sera
+            refusé et signalé.
           </label>
         </div>
 

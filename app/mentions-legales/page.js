@@ -33,6 +33,28 @@ export default function MentionsLegalesPage() {
           confirme être majeur dans son pays de résidence.
         </p>
 
+        <h2 style={sectionStyle}>Charte de contenu : consentement et contenus strictement interdits</h2>
+        <p>
+          Toute publication sur UnDouxUnChaud (texte, photo ou audio) ne peut représenter que des
+          situations et des personnes consentantes, âgées de 18 ans ou plus. Chaque auteur·rice doit
+          certifier ce consentement au moment de la soumission.
+        </p>
+        <p>
+          Sont strictement interdits, sans exception, et donnent lieu à un refus immédiat, à la
+          suppression du compte et, le cas échéant, à un signalement aux autorités compétentes :
+        </p>
+        <ul style={{ margin: '10px 0 10px 20px', lineHeight: 1.9 }}>
+          <li>tout contenu impliquant ou évoquant des mineurs (moins de 18 ans), sous quelque forme que ce soit, y compris fictive ;</li>
+          <li>tout contenu à caractère pédophile ;</li>
+          <li>tout contenu impliquant des actes sexuels avec des animaux (zoophilie) ;</li>
+          <li>tout contenu décrivant des actes non consentis présentés comme désirables ou légitimes.</li>
+        </ul>
+        <p>
+          Chaque texte, photo ou fichier audio est relu par un·e modérateur·rice avant publication.
+          UnDouxUnChaud se réserve le droit de retirer, à tout moment et sans préavis, tout contenu déjà
+          publié qui contreviendrait à cette charte.
+        </p>
+
         <h2 style={sectionStyle}>Propriété intellectuelle</h2>
         <p>
           L'ensemble des textes publiés reste la propriété de leurs auteur·rice·s

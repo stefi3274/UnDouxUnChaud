@@ -16,10 +16,13 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Trop d\'audios envoyés récemment. Réessaie plus tard.' }, { status: 429 });
   }
 
-  const { titre, description, categorie, audio_path, duree_secondes, serie_titre, chapitre_numero } = await request.json();
+  const { titre, description, categorie, audio_path, duree_secondes, serie_titre, chapitre_numero, consentement_certifie } = await request.json();
 
   if (!titre?.trim() || !audio_path) {
     return NextResponse.json({ error: 'Titre et fichier audio requis.' }, { status: 400 });
+  }
+  if (!consentement_certifie) {
+    return NextResponse.json({ error: 'La certification de consentement est obligatoire.' }, { status: 400 });
   }
   if (titre.trim().length > 150) {
     return NextResponse.json({ error: 'Le titre est trop long (150 caractères maximum).' }, { status: 400 });
@@ -41,6 +44,7 @@ export async function POST(request) {
     statut: 'en_attente',
     serie_titre: serieTitre,
     chapitre_numero: chapitreNumero,
+    consentement_certifie: true,
   });
 
   if (error) {
