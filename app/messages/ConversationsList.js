@@ -91,8 +91,18 @@ export default function ConversationsList() {
       if (!annule) setConversations(data.conversations || []);
     }
     charger();
-    const intervalle = setInterval(charger, 5000);
-    return () => { annule = true; clearInterval(intervalle); };
+    const intervalle = setInterval(() => {
+      if (document.visibilityState === 'visible') charger();
+    }, 15000);
+    function surVisibilite() {
+      if (document.visibilityState === 'visible') charger();
+    }
+    document.addEventListener('visibilitychange', surVisibilite);
+    return () => {
+      annule = true;
+      clearInterval(intervalle);
+      document.removeEventListener('visibilitychange', surVisibilite);
+    };
   }, []);
 
   async function verifierPin(e) {

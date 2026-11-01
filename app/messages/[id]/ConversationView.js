@@ -85,6 +85,7 @@ export default function ConversationView({ conversationId, moi }) {
   const inputRef = useRef(null);
   const fichierRef = useRef(null);
   const messageRefs = useRef({});
+  const messagesRef = useRef([]);
 
   // Fait défiler jusqu'au message d'origine d'une réponse et le surligne
   // brièvement, pour qu'on le retrouve facilement dans le fil.
@@ -107,18 +108,29 @@ export default function ConversationView({ conversationId, moi }) {
   useEffect(() => {
     chargerMeta();
     // Rafraîchit régulièrement le statut "en ligne" de l'interlocuteur.
-    const intervalle = setInterval(chargerMeta, 20000);
+    const intervalle = setInterval(() => {
+      if (document.visibilityState === 'visible') chargerMeta();
+    }, 60000);
     return () => clearInterval(intervalle);
   }, [conversationId]);
 
   async function chargerMessages(silencieux = false) {
     if (!silencieux) setChargement(true);
-    const res = await fetch(`/api/messages/${conversationId}`);
+    const connues = messagesRef.current
+      .filter((m) => m.imageUrl && !m.id?.toString().startsWith('temp-'))
+      .map((m) => m.id)
+      .slice(0, 60)
+      .join(',');
+    const res = await fetch(`/api/messages/${conversationId}${connues ? `?connues=${connues}` : ''}`);
     if (!res.ok) { setErreur('Conversation introuvable.'); setChargement(false); return; }
     const data = await res.json();
     setMessages((prev) => {
       const enAttente = prev.filter((m) => m.id?.toString().startsWith('temp-'));
-      return [...(data.messages || []), ...enAttente];
+      const urlParId = Object.fromEntries(prev.filter((m) => m.imageUrl).map((m) => [m.id, m.imageUrl]));
+      const recus = (data.messages || []).map((m) => (
+        m.image_path && !m.imageUrl && urlParId[m.id] ? { ...m, imageUrl: urlParId[m.id] } : m
+      ));
+      return [...recus, ...enAttente];
     });
     setChargement(false);
   }
@@ -127,14 +139,27 @@ export default function ConversationView({ conversationId, moi }) {
     if (!meta) return;
     if (meta.verrouillee && !deverrouille) return; // en attente du code
     chargerMessages();
-    const intervalle = setInterval(() => chargerMessages(true), 3000);
-    return () => clearInterval(intervalle);
+    // 5 s, et seulement quand l'onglet est visible (puis rattrapage immédiat
+    // au retour) : un onglet oublié en arrière-plan ne consomme plus rien.
+    const intervalle = setInterval(() => {
+      if (document.visibilityState === 'visible') chargerMessages(true);
+    }, 5000);
+    function surVisibilite() {
+      if (document.visibilityState === 'visible') chargerMessages(true);
+    }
+    document.addEventListener('visibilitychange', surVisibilite);
+    return () => {
+      clearInterval(intervalle);
+      document.removeEventListener('visibilitychange', surVisibilite);
+    };
     // On ne dépend QUE de meta.verrouillee (pas de l'objet meta entier) :
     // meta est réécrit toutes les 20s pour rafraîchir le statut "en ligne",
     // ce qui recréait cet effet à chaque fois, remettait la conversation en
     // "Chargement..." et faisait perdre le texte en cours de saisie.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [meta?.verrouillee, deverrouille]);
+
+  useEffect(() => { messagesRef.current = messages; }, [messages]);
 
   useEffect(() => {
     finDeFil.current?.scrollIntoView({ block: 'end' });

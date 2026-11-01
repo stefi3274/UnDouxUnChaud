@@ -21,13 +21,16 @@ export default function HeaderNav({ user }) {
   }, [user]);
 
   // Signale que l'utilisateur est actif (statut "en ligne"), tant que
-  // l'app reste ouverte. Envoyé au montage, toutes les 45s, et dès que
+  // l'app reste ouverte. Envoyé au montage, toutes les 2 min, et dès que
   // l'onglet redevient visible après avoir été en arrière-plan.
   useEffect(() => {
     if (!user) return;
-    const envoyerPresence = () => fetch('/api/presence/heartbeat', { method: 'POST' }).catch(() => {});
+    const envoyerPresence = () => {
+      if (document.visibilityState !== 'visible') return;
+      fetch('/api/presence/heartbeat', { method: 'POST' }).catch(() => {});
+    };
     envoyerPresence();
-    const intervalle = setInterval(envoyerPresence, 45000);
+    const intervalle = setInterval(envoyerPresence, 120000);
     function surVisibilite() {
       if (document.visibilityState === 'visible') envoyerPresence();
     }

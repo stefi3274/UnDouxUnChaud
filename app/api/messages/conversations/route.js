@@ -24,6 +24,21 @@ export async function GET() {
     .eq('user_id', user.id);
   const idsVerrouilles = new Set((verrous || []).map((v) => v.conversation_id));
 
+  // Un seul appel pour tous les non-lus (au lieu d'un appel par conversation).
+  const idsConv = (conversations || []).map((c) => c.id);
+  const { data: nonLusRows } = idsConv.length > 0
+    ? await supabaseAdmin
+        .from('udc_messages')
+        .select('conversation_id')
+        .in('conversation_id', idsConv)
+        .eq('lu', false)
+        .neq('sender_id', user.id)
+    : { data: [] };
+  const nonLusParConv = {};
+  for (const r of nonLusRows || []) {
+    nonLusParConv[r.conversation_id] = (nonLusParConv[r.conversation_id] || 0) + 1;
+  }
+
   const resultats = await Promise.all(
     (conversations || []).map(async (c) => {
       const autrePseudo = c.user1_id === user.id ? c.udc_users_user2?.pseudo : c.udc_users_user1?.pseudo;
@@ -39,12 +54,7 @@ export async function GET() {
         .limit(1)
         .maybeSingle();
 
-      const { count: nonLus } = await supabaseAdmin
-        .from('udc_messages')
-        .select('*', { count: 'exact', head: true })
-        .eq('conversation_id', c.id)
-        .eq('lu', false)
-        .neq('sender_id', user.id);
+      const nonLus = nonLusParConv[c.id] || 0;
 
       return {
         id: c.id,

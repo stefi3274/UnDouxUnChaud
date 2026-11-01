@@ -54,10 +54,18 @@ export async function GET(request, { params }) {
     ? await supabaseAdmin.from('udc_message_reactions').select('message_id, user_id, emoji').in('message_id', idsMessages)
     : { data: [] };
 
+  // Le client indique les messages dont il possède déjà l'URL d'image : on
+  // ne re-signe pas ceux-là (chaque signature = un appel Storage, et une
+  // nouvelle URL forçait le navigateur à retélécharger l'image à chaque
+  // rafraîchissement, ce qui consommait le quota de bande passante).
+  const urlsConnues = new Set(
+    (new URL(request.url).searchParams.get('connues') || '').split(',').filter(Boolean).slice(0, 60)
+  );
+
   const messagesAvecImages = await Promise.all(
     (messages || []).map(async (m) => {
-      const imageUrl = m.image_path
-        ? (await supabaseAdmin.storage.from('messages-images').createSignedUrl(m.image_path, 3600)).data?.signedUrl || null
+      const imageUrl = m.image_path && !urlsConnues.has(String(m.id))
+        ? (await supabaseAdmin.storage.from('messages-images').createSignedUrl(m.image_path, 86400)).data?.signedUrl || null
         : null;
 
       const reactionsDuMessage = (reactions || []).filter((r) => r.message_id === m.id);
@@ -78,13 +86,16 @@ export async function GET(request, { params }) {
     })
   );
 
-  // Marque comme lus les messages reçus (pas les nôtres).
-  await supabaseAdmin
-    .from('udc_messages')
-    .update({ lu: true })
-    .eq('conversation_id', params.id)
-    .neq('sender_id', user.id)
-    .eq('lu', false);
+  // Marque comme lus les messages reçus (pas les nôtres), uniquement s'il y
+  // en a : évite une écriture en base à chaque rafraîchissement.
+  if ((messages || []).some((m) => m.sender_id !== user.id && !m.lu)) {
+    await supabaseAdmin
+      .from('udc_messages')
+      .update({ lu: true })
+      .eq('conversation_id', params.id)
+      .neq('sender_id', user.id)
+      .eq('lu', false);
+  }
 
   return NextResponse.json({
     messages: messagesAvecImages,
