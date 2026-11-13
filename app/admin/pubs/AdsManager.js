@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { compresserImage } from '@/lib/compresserImage';
 
 const EMPLACEMENTS = [
   { value: 'fil', label: 'Dans le fil de textes' },
@@ -42,7 +43,7 @@ export default function AdsManager() {
       let image_path = null;
       if (fichier) {
         const fd = new FormData();
-        fd.append('file', fichier);
+        fd.append('file', await compresserImage(fichier));
         const resUpload = await fetch('/api/admin/ads/upload-image', { method: 'POST', body: fd });
         const dataUpload = await resUpload.json();
         if (!resUpload.ok) throw new Error(dataUpload.error || "Erreur lors de l'envoi de l'image.");

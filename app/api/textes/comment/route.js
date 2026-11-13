@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { rafraichirContenu } from '@/lib/cache';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
 import { verifierLimite, obtenirIp } from '@/lib/rateLimit';
@@ -47,5 +48,6 @@ export async function POST(request) {
     await creerNotification({ user_id: texte.user_id, type: 'commentaire', texte_id, acteur_id: user.id });
   }
 
+  rafraichirContenu();
   return NextResponse.json({ commentaire });
 }

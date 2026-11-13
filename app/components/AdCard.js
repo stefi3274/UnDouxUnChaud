@@ -17,7 +17,7 @@ export default function AdCard({ ad }) {
         Publicité
       </span>
       {image && (
-        <img
+        <img loading="lazy"
           src={image}
           alt=""
           style={{ width: '100%', height: 120, objectFit: 'cover', borderRadius: 10, marginTop: 10 }}

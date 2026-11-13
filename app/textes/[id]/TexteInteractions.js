@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function TexteInteractions({ texteId, auteurId, initialLikes, initiallyLiked, comments, user }) {
@@ -11,6 +11,10 @@ export default function TexteInteractions({ texteId, auteurId, initialLikes, ini
   const [commentaire, setCommentaire] = useState('');
   const [replyTo, setReplyTo] = useState(null);
   const [envoi, setEnvoi] = useState(false);
+
+  // Resynchronise avec le serveur après un rafraîchissement automatique.
+  useEffect(() => { setLikes(initialLikes); }, [initialLikes]);
+  useEffect(() => { setLiked(!!initiallyLiked); }, [initiallyLiked]);
 
   async function handleLike() {
     if (!user) { router.push('/connexion'); return; }

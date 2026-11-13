@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { rafraichirContenu } from '@/lib/cache';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
 import { creerNotification } from '@/lib/notifications';
@@ -40,11 +41,13 @@ export async function POST(request) {
 
   if (likeExistant) {
     await supabaseAdmin.from('udc_likes').delete().eq('id', likeExistant.id);
+    rafraichirContenu();
     return NextResponse.json({ liked: false });
   }
 
   await supabaseAdmin.from('udc_likes').insert({ texte_id, user_id: user.id });
   await creerNotification({ user_id: texte.user_id, type: 'like', texte_id, acteur_id: user.id });
 
+  rafraichirContenu();
   return NextResponse.json({ liked: true });
 }

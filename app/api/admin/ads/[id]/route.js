@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { rafraichirContenu } from '@/lib/cache';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
 
@@ -20,6 +21,7 @@ export async function PATCH(request, { params }) {
   if (error) {
     return NextResponse.json({ error: 'Erreur de mise à jour.' }, { status: 500 });
   }
+  rafraichirContenu();
   return NextResponse.json({ ad: data });
 }
 
@@ -48,5 +50,6 @@ export async function DELETE(request, { params }) {
     await supabaseAdmin.storage.from('pubs-images').remove([pub.image_path]);
   }
 
+  rafraichirContenu();
   return NextResponse.json({ ok: true });
 }

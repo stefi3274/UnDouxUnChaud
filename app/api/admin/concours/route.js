@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { rafraichirContenu } from '@/lib/cache';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
 
@@ -9,6 +10,7 @@ export async function GET() {
   }
 
   const { data } = await supabaseAdmin.from('udc_concours').select('*').order('date_debut', { ascending: false });
+  rafraichirContenu();
   return NextResponse.json({ concours: data || [] });
 }
 
@@ -35,5 +37,6 @@ export async function POST(request) {
   if (error) {
     return NextResponse.json({ error: 'Erreur lors de la création.' }, { status: 500 });
   }
+  rafraichirContenu();
   return NextResponse.json({ concours: data });
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ChampSerie from '@/app/components/ChampSerie';
+import { compresserImage } from '@/lib/compresserImage';
 
 const CATEGORIES = [
   { value: 'un_doux', label: 'Un Doux', color: '#E85D8A' },
@@ -95,7 +96,7 @@ export default function EcrireForm() {
     setErreur('');
 
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', await compresserImage(file));
 
     const res = await fetch('/api/upload', { method: 'POST', body: formData });
     const data = await res.json();

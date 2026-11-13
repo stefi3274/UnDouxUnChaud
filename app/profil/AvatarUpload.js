@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { compresserImage } from '@/lib/compresserImage';
 
 export default function AvatarUpload({ avatarUrl, pseudo }) {
   const [url, setUrl] = useState(avatarUrl);
@@ -15,7 +16,7 @@ export default function AvatarUpload({ avatarUrl, pseudo }) {
     setChargement(true);
 
     const fd = new FormData();
-    fd.append('file', file);
+    fd.append('file', await compresserImage(file, 512, 0.8));
     const res = await fetch('/api/profil/avatar', { method: 'POST', body: fd });
     const data = await res.json();
     setChargement(false);

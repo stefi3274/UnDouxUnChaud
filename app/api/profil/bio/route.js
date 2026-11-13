@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { rafraichirContenu } from '@/lib/cache';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
 
@@ -17,5 +18,6 @@ export async function POST(request) {
   if (error) {
     return NextResponse.json({ error: 'Erreur lors de la mise à jour.' }, { status: 500 });
   }
+  rafraichirContenu();
   return NextResponse.json({ ok: true });
 }

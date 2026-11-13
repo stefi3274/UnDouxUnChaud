@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { rafraichirContenu } from '@/lib/cache';
 import { supabaseAdmin } from '@/lib/supabase';
 import { obtenirIdentifiant } from '@/lib/visiteur';
 import { verifierLimite, obtenirIp } from '@/lib/rateLimit';
@@ -53,6 +54,7 @@ export async function POST(request, { params }) {
   const total = toutesLesNotes?.length || 0;
   const moyenne = total > 0 ? toutesLesNotes.reduce((s, n) => s + n.note, 0) / total : 0;
 
+  rafraichirContenu();
   return NextResponse.json({ ok: true, moyenne, total, maNote: noteNombre });
 }
 
@@ -69,5 +71,6 @@ export async function GET(request, { params }) {
   const moyenne = total > 0 ? toutesLesNotes.reduce((s, n) => s + n.note, 0) / total : 0;
   const maNote = toutesLesNotes?.find((n) => n.identifiant === identifiant)?.note || 0;
 
+  rafraichirContenu();
   return NextResponse.json({ moyenne, total, maNote });
 }

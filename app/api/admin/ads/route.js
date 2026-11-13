@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { rafraichirContenu } from '@/lib/cache';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
 
@@ -18,6 +19,7 @@ export async function GET() {
   if (error) {
     return NextResponse.json({ error: 'Erreur de chargement.' }, { status: 500 });
   }
+  rafraichirContenu();
   return NextResponse.json({ ads: data });
 }
 
@@ -52,5 +54,6 @@ export async function POST(request) {
   if (error) {
     return NextResponse.json({ error: "Erreur lors de la création de la pub." }, { status: 500 });
   }
+  rafraichirContenu();
   return NextResponse.json({ ad: data });
 }

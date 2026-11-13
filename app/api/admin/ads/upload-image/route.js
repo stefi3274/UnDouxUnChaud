@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { rafraichirContenu } from '@/lib/cache';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
 
@@ -38,5 +39,6 @@ export async function POST(request) {
 
   const { data } = supabaseAdmin.storage.from('pubs-images').getPublicUrl(chemin);
 
+  rafraichirContenu();
   return NextResponse.json({ path: chemin, url: data.publicUrl });
 }

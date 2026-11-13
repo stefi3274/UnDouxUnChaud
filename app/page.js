@@ -5,6 +5,7 @@ import HeaderNav from '@/app/components/HeaderNav';
 import TextesFeed from '@/app/components/TextesFeed';
 import AdBanner from '@/app/components/AdBanner';
 import VignettesRow from '@/app/components/VignettesRow';
+import AutoRafraichir from '@/app/components/AutoRafraichir';
 import SplashScreen from '@/app/components/SplashScreen';
 import BoutonSurprendsMoi from '@/app/components/BoutonSurprendsMoi';
 
@@ -102,6 +103,7 @@ export default async function HomePage() {
   return (
     <>
       <SplashScreen />
+      <AutoRafraichir />
       <HeaderNav user={user} />
 
       <section className="hero">

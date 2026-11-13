@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { rafraichirContenu } from '@/lib/cache';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
 
@@ -45,6 +46,7 @@ export async function POST(request) {
   }
 
   const { data } = supabaseAdmin.storage.from('avatars-images').getPublicUrl(chemin);
+  rafraichirContenu();
   return NextResponse.json({ url: data.publicUrl });
 }
 
@@ -61,5 +63,6 @@ export async function DELETE() {
     await supabaseAdmin.storage.from('avatars-images').remove([ancien.avatar_path]);
   }
 
+  rafraichirContenu();
   return NextResponse.json({ ok: true });
 }

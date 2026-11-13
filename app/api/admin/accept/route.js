@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { rafraichirContenu } from '@/lib/cache';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
 import { creerNotification } from '@/lib/notifications';
@@ -38,5 +39,6 @@ export async function POST(request) {
     )
   );
 
+  rafraichirContenu();
   return NextResponse.json({ ok: true });
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { rafraichirContenu } from '@/lib/cache';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
 import { verifierLimite } from '@/lib/rateLimit';
@@ -89,5 +90,6 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Erreur lors de la soumission.' }, { status: 500 });
   }
 
+  rafraichirContenu();
   return NextResponse.json({ texte });
 }

@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { supabasePublic, supabaseAdmin } from '@/lib/supabase';
+import { supabasePublic, supabaseAdmin, supabaseContenu } from '@/lib/supabase';
 import { getSessionUser } from '@/lib/auth';
+import AutoRafraichir from '@/app/components/AutoRafraichir';
 import HeaderNav from '@/app/components/HeaderNav';
 import TexteInteractions from './TexteInteractions';
 import MessageAuteurButton from './MessageAuteurButton';
@@ -64,7 +65,7 @@ async function getCommentaires(texteId) {
   // udc_users jointe, masquer certaines lignes (dont celles de l'auteur
   // connecté). Les commentaires sont publics de toute façon : aucun risque
   // à les lire côté serveur avec le service role.
-  const { data } = await supabaseAdmin
+  const { data } = await supabaseContenu
     .from('udc_commentaires')
     .select('*, udc_users(pseudo)')
     .eq('texte_id', texteId)
@@ -132,6 +133,7 @@ export default async function TextePage({ params }) {
   return (
     <>
       <HeaderNav user={user} />
+      <AutoRafraichir />
       <RegistrerLecture texteId={texte.id} />
       <main style={{ maxWidth: 680, margin: '0 auto', padding: '5vw 6vw 8vw' }}>
         <span className={`badge ${texte.categorie}`}>
@@ -177,7 +179,7 @@ export default async function TextePage({ params }) {
           {(() => {
             const avatar = urlAvatar(texte.udc_users?.avatar_path);
             return avatar ? (
-              <img src={avatar} alt="" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover', marginRight: 8 }} />
+              <img loading="lazy" src={avatar} alt="" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover', marginRight: 8 }} />
             ) : null;
           })()}
           <Link href={`/auteur/${encodeURIComponent(texte.udc_users?.pseudo || '')}`} style={{ color: '#0A5F63', fontWeight: 700, textDecoration: 'none' }}>

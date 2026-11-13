@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ChampSerie from '@/app/components/ChampSerie';
+import { compresserImage } from '@/lib/compresserImage';
 
 const CATEGORIES = [
   { value: 'un_doux', label: 'Un Doux', color: '#E85D8A' },
@@ -42,7 +43,7 @@ export default function PublierPhotoForm() {
     setEnvoi(true);
     try {
       const fd = new FormData();
-      fd.append('file', fichier);
+      fd.append('file', await compresserImage(fichier, 2000, 0.8));
       fd.append('titre', titre);
       fd.append('description', description);
       fd.append('categorie', categorie);

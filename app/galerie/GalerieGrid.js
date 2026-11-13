@@ -78,7 +78,7 @@ export default function GalerieGrid({ photos, connecte }) {
             }}
           >
             {p.url && (
-              <img src={p.url} alt={p.titre || ''} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              <img loading="lazy" decoding="async" src={p.url} alt={p.titre || ''} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
             )}
             <div style={{
               position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.55), transparent 45%)',
